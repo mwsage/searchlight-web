@@ -14,7 +14,7 @@
      it reads the public invite projection, shows the recipient what they were invited
      to, and routes them into the app or to the install.
 
-  2. `/` — the home page. Before this existed, every path served the invite view, so
+  2. `/` — the welcome page. Before this existed, every path served the invite view, so
      anyone who reached searchlight.social on their own — or was told the name rather
      than sent a link — was greeted by "This invite link isn't valid". The product read
      as broken to exactly the people arriving with the most curiosity and the least
@@ -24,14 +24,19 @@
   `wrangler.jsonc` deliberately has no `main` script, and adding one would turn a page
   that cannot break into a service that can. Nothing here fetches on the home path.
 
+  /privacy and /support are their OWN static files (public/privacy/, public/support/),
+  not views in here. Exact-match assets win over the SPA fallback, so they need no
+  routing code at all, they stay independently linkable for the App Store submission
+  fields, and this file does not grow a legal document.
+
   DESIGN NOTE: the install destination lives in ONE constant (INSTALL_URL). It points at
   TestFlight during beta and at the App Store at launch — changing it is a one-line
   edit to this page, never an app release.
 -->
-<title>Searchlight</title>
+<title>Searchlight — the social app for spontaneous plans</title>
 <!--
   DEFAULT DENY, then upgrade. Invite pages must NEVER be indexed: they render who
-  invited you and to what. The home page should be. Since this is one static file
+  invited you and to what. The welcome page should be. Since this is one static file
   serving both, the tag ships as noindex and the script RELAXES it on the home path
   only.
 
@@ -41,6 +46,7 @@
   moment a crawler skipped the script. Fail-safe is the only acceptable default here.
 -->
 <meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Searchlight helps real-life groups turn casual plans into actual get-togethers. Create a group once. When something is happening, throw up a Searchlight.">
 <meta name="theme-color" content="#000000">
 <!--
   Link-preview scrapers (Messages, WhatsApp, Slack) generally do NOT execute JavaScript,
@@ -52,7 +58,7 @@
   which this site deliberately does not have.
 -->
 <meta property="og:title" content="Searchlight">
-<meta property="og:description" content="A searchlight tells your group an activity is live.">
+<meta property="og:description" content="Less planning. More showing up. The social app for spontaneous plans.">
 <meta property="og:type" content="website">
 <style>
   /* Tokens mirrored from the app (app/constants/designTokens.ts) so the page and the
@@ -83,7 +89,18 @@
     padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
     line-height: 1.45;
   }
+  /*
+    The invite view is one small card, vertically centred. The welcome page is a long
+    document that must scroll from the top. Rather than fight the centring with
+    overrides, the script swaps the body into this layout when it takes the home path.
+  */
+  body.is-home {
+    display: block;
+    padding: 0 0 calc(56px + env(safe-area-inset-bottom));
+  }
   main { width: 100%; max-width: 420px; }
+  body.is-home main { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
   .brand {
     font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--gold); text-align: center; margin-bottom: 28px; font-weight: 600;
@@ -115,30 +132,85 @@
   .skeleton.wide { width: 70%; } .skeleton.narrow { width: 40%; }
   [hidden] { display: none !important; }
 
-  /* --- home ------------------------------------------------------------------
-     The home card is wider and quieter than the invite card: an invited visitor
-     arrives knowing why they are here and needs one decision, while someone who
-     found the name on their own needs to learn what the product is first. */
-  .lede { font-size: 17px; line-height: 1.4; margin: 0 0 20px; color: var(--text); }
-  .steps { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-  .steps li { display: flex; gap: 12px; align-items: flex-start; }
-  .steps .n {
-    flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
-    background: var(--gold); color: #000;
-    font-size: 12px; font-weight: 700; line-height: 22px; text-align: center;
+  /* --- the welcome page ------------------------------------------------------ */
+
+  .hero { padding: 72px 0 56px; text-align: center; }
+  .wordmark {
+    font-size: clamp(44px, 12vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text);
   }
-  .steps .t { font-size: 15px; color: var(--text); }
-  .steps .t span { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+  .tagline {
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin: 0 0 40px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 6.5vw, 40px);
+    line-height: 1.14; letter-spacing: -0.02em; font-weight: 680;
+    margin: 0 0 18px; text-wrap: balance;
+  }
+  .hero p { font-size: 17px; line-height: 1.5; color: var(--muted); margin: 0 auto 16px; max-width: 46ch; }
+  .hero .kicker { color: var(--text); font-weight: 600; }
+  .hero .actions { max-width: 320px; margin: 32px auto 0; }
+
+  section.block { padding: 48px 0; border-top: 1px solid var(--border-subtle); }
+  section.block h2 {
+    font-size: clamp(22px, 4.6vw, 28px); line-height: 1.2; letter-spacing: -0.015em;
+    font-weight: 660; margin: 0 0 18px; text-wrap: balance;
+  }
+  section.block p { font-size: 16px; line-height: 1.55; color: var(--muted); margin: 0 0 14px; max-width: 58ch; }
+  section.block p.lead { color: var(--text); font-size: 17px; }
+  section.block p:last-child { margin-bottom: 0; }
+
+  /* Lines the founder wrote as their own beat — each stands alone, so they are set
+     as separate lines rather than run together into a paragraph. */
+  .beats { list-style: none; margin: 0 0 18px; padding: 0; }
+  .beats li { font-size: 16px; line-height: 1.7; color: var(--muted); }
+  .beats.strong li { color: var(--text); }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 28px; }
+  .steps > li { display: flex; gap: 16px; align-items: flex-start; }
+  .steps .n {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gold); color: #000;
+    font-size: 15px; font-weight: 700; line-height: 30px; text-align: center;
+  }
+  .steps h3 { font-size: 18px; margin: 3px 0 8px; font-weight: 640; }
+  .steps p { margin: 0 0 8px; }
+
+  .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; }
+  .ex { background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 16px; }
+  .ex .k { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin: 0 0 6px; }
+  .ex .q { font-size: 15px; color: var(--text); margin: 0; line-height: 1.4; }
+
+  .closing { padding: 56px 0 8px; text-align: center; border-top: 1px solid var(--border-subtle); }
+  .closing h2 { font-size: clamp(26px, 6vw, 34px); margin: 0 0 20px; }
+  .closing .beats { display: inline-block; text-align: left; }
+  .closing .actions { max-width: 320px; margin: 28px auto 0; }
+
   /* Honest stand-in for the button while the beta link does not exist yet — see
      BETA_LINK_READY in the script. */
   .soon {
     text-align: center; padding: 14px 16px; border-radius: var(--radius);
-    border: 1px dashed var(--border-subtle); color: var(--muted); font-size: 15px;
+    border: 1px dashed var(--border-subtle); color: var(--muted); font-size: 15px; margin: 0;
   }
+
+  .sitefoot {
+    padding: 40px 0 0; margin-top: 40px; border-top: 1px solid var(--border-subtle);
+    display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; align-items: center;
+    font-size: 14px;
+  }
+  .sitefoot a { color: var(--muted); text-decoration: none; padding: 8px 4px; }
+  .sitefoot a:hover, .sitefoot a:focus-visible { color: var(--text); text-decoration: underline; }
+  .sitefoot .c { color: var(--muted); width: 100%; text-align: center; font-size: 13px; }
+  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 </style>
 <!--
   With JavaScript off, the invite view can never resolve (it needs a fetch) and the
-  skeleton would sit there forever. Show the home content instead: a no-JS visitor
+  skeleton would sit there forever. Show the welcome content instead: a no-JS visitor
   then learns what Searchlight is and can still install it, which is a real page
   rather than a permanent loading state. ID selectors outrank the `[hidden]` attribute
   rule, so this wins without touching the default markup or the JS path.
@@ -146,38 +218,198 @@
 <noscript><style>
   #loading { display: none !important; }
   #home { display: block !important; }
+  body { display: block !important; padding: 0 0 56px !important; }
+  main { max-width: 720px !important; margin: 0 auto !important; padding: 0 20px !important; }
+  #brandLine { display: none !important; }
 </style></noscript>
 </head>
 <body>
 <main>
-  <div class="brand">Searchlight</div>
+  <div class="brand" id="brandLine">Searchlight</div>
 
   <!--
     Home — everyone who arrives without an invite link. No fetch, no network, no
     failure state: this section is complete in the markup and only needs unhiding.
   -->
-  <section id="home" class="card" hidden>
-    <h1>A searchlight tells your group an activity is live.</h1>
-    <p class="lede">Turn yours on and the people in your group know you're out, what's
-      happening, and where to find you. Turn it off and it's over. That's the whole app.</p>
-    <ol class="steps">
-      <li>
-        <span class="n">1</span>
-        <span class="t">Make a group<span>The people your searchlight reaches</span></span>
-      </li>
-      <li>
-        <span class="n">2</span>
-        <span class="t">Turn your searchlight on<span>Say what's happening and where</span></span>
-      </li>
-      <li>
-        <span class="n">3</span>
-        <span class="t">They see it light up<span>No feed to scroll, no post to miss</span></span>
-      </li>
-    </ol>
-    <div class="actions">
-      <a class="btn primary" id="joinBeta" href="#" hidden>Join the beta</a>
-      <p class="soon" id="betaSoon" hidden>The beta opens shortly.</p>
+  <section id="home" hidden>
+
+    <div class="hero">
+      <p class="wordmark">Searchlight</p>
+      <p class="tagline">The social app for spontaneous plans</p>
+      <h1>Less planning. More showing up.</h1>
+      <p>Searchlight helps real-life groups turn casual plans into actual
+        get-togethers.</p>
+      <p>Create a group once. When something is happening, throw up a Searchlight.
+        Your people get the heads up, jump into the temporary event chat, and decide
+        if they're in.</p>
+      <p class="kicker">The group stays. The plan comes and goes.</p>
+      <div class="actions">
+        <a class="btn primary" id="joinBeta" href="#" hidden>Join the beta</a>
+        <p class="soon" id="betaSoon" hidden>The beta opens shortly.</p>
+      </div>
     </div>
+
+    <section class="block">
+      <h2>Some groups do not need more organization.</h2>
+      <p class="lead">They just need a heads up.</p>
+      <p>Searchlight lets you create persistent groups for the people you actually do
+        things with — cigar nights, golf rounds, drinks, workouts, poker, hikes, game
+        days, whatever your thing is.</p>
+      <p>When someone wants to get together, they throw up a Searchlight.</p>
+      <p>The group sees what's happening, where it's happening, and when. Whoever wants
+        in can jump in.</p>
+      <p class="lead">Your groups stay. The events disappear.</p>
+    </section>
+
+    <section class="block">
+      <h2>Your friend groups should not have to be rebuilt every time.</h2>
+      <p>With Searchlight, your groups are always there. The events are temporary. The
+        chat is temporary. The moment is the point.</p>
+      <ul class="beats strong">
+        <li>Create the group once.</li>
+        <li>Use it whenever something is going on.</li>
+        <li>Let the plan live while it matters.</li>
+        <li>Then move on.</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <h2>Built for real-life coordination</h2>
+      <p>Searchlight is made for the plans that are too casual for a calendar invite and
+        too real to leave to chance.</p>
+      <ul class="beats">
+        <li>A cigar at the lounge.</li>
+        <li>A round after work.</li>
+        <li>A drink downtown.</li>
+        <li>A fire pit tonight.</li>
+        <li>A last-minute game watch.</li>
+        <li>A quick "I'm heading here — who's in?"</li>
+      </ul>
+      <p>It is not another feed. It is not another place to perform. It is not another
+        social network asking for your whole life.</p>
+      <p class="lead">It is a beacon.</p>
+    </section>
+
+    <section class="block">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>
+          <span class="n">1</span>
+          <div>
+            <h3>Create your group</h3>
+            <p>Start a group around the people you actually meet up with.</p>
+            <ul class="beats">
+              <li>Your cigar crew.</li>
+              <li>Your golf group.</li>
+              <li>Your neighborhood crew.</li>
+              <li>Your college friends.</li>
+              <li>Your Saturday regulars.</li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <div>
+            <h3>Throw up a Searchlight</h3>
+            <p>When something is happening, send the signal.</p>
+            <p>Add the what, when, and where. Keep it loose or make it specific.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">3</span>
+          <div>
+            <h3>Let the right people show up</h3>
+            <p>The group gets the heads up. People can jump in, chat inside the event,
+              and coordinate while the plan is alive.</p>
+            <p>When it is over, it is over.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="block">
+      <h2>Made for people who would rather do something than talk about doing
+        something.</h2>
+      <p>Most social tools turn simple plans into work.</p>
+      <p class="lead">Searchlight is different.</p>
+      <p>It is built for the person who says, "I'm heading to the lounge around 7," and
+        wants the group to know without personally texting twelve people.</p>
+      <p>It is for lightweight coordination that actually gets people together.</p>
+    </section>
+
+    <section class="block">
+      <h2>Less planning. More showing up.</h2>
+      <p>Life gets busy. Friendships get passive. Good plans die because nobody wants to
+        be the organizer every time.</p>
+      <p class="lead">Searchlight makes the ask smaller.</p>
+      <ul class="beats">
+        <li>You are not hosting an event.</li>
+        <li>You are not managing RSVPs.</li>
+        <li>You are not begging people to commit.</li>
+      </ul>
+      <p class="lead">You are just lighting the signal.</p>
+    </section>
+
+    <section class="block">
+      <h2>Example uses</h2>
+      <div class="examples">
+        <div class="ex">
+          <p class="k">Cigar night</p>
+          <p class="q">"Heading to the lounge at 7. Bringing a few sticks."</p>
+        </div>
+        <div class="ex">
+          <p class="k">Golf</p>
+          <p class="q">"Looking for two more tomorrow morning."</p>
+        </div>
+        <div class="ex">
+          <p class="k">Drinks</p>
+          <p class="q">"Going downtown after work. First stop: 6:30."</p>
+        </div>
+        <div class="ex">
+          <p class="k">Game day</p>
+          <p class="q">"Watching the fight here tonight."</p>
+        </div>
+        <div class="ex">
+          <p class="k">Fire pit</p>
+          <p class="q">"Backyard fire later. Bring something to drink."</p>
+        </div>
+        <div class="ex">
+          <p class="k">Workout</p>
+          <p class="q">"Trail run at 8. Easy pace."</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Why Searchlight</h2>
+      <ul class="beats">
+        <li>Because group chats are noisy.</li>
+        <li>Because planning kills momentum.</li>
+        <li>Because not every hangout needs a host.</li>
+        <li>Because sometimes the difference between staying in and getting together is
+          one simple signal.</li>
+      </ul>
+    </section>
+
+    <div class="closing">
+      <h2>Send the signal.</h2>
+      <ul class="beats strong">
+        <li>Create your group.</li>
+        <li>Throw up a Searchlight.</li>
+        <li>See who shows.</li>
+      </ul>
+      <div class="actions">
+        <a class="btn primary" id="joinBetaFoot" href="#" hidden>Join the beta</a>
+        <p class="soon" id="betaSoonFoot" hidden>The beta opens shortly.</p>
+      </div>
+    </div>
+
+    <footer class="sitefoot">
+      <a href="/privacy">Privacy</a>
+      <a href="/support">Support</a>
+      <p class="c">© Searchlight</p>
+    </footer>
+
   </section>
 
   <!-- Loading: a skeleton, not a spinner — mirrors the app's loading treatment. -->
@@ -231,10 +463,10 @@
   // Whether INSTALL_URL is a real destination yet. Bare `testflight.apple.com` is
   // Apple's generic marketing page: it does not install anything and it does not
   // explain itself, so a visitor who taps "Join the beta" today lands somewhere that
-  // looks like a mistake. Until the public link exists, the home page says so plainly
-  // instead. Pasting the link above and flipping this to true is the whole change —
-  // and the invite view is unaffected either way, since its buttons only ever appear
-  // to someone who was actually invited.
+  // looks like a mistake. Until the public link exists, the welcome page says so
+  // plainly instead. Pasting the link above and flipping this to true is the whole
+  // change — and the invite view is unaffected either way, since its buttons only ever
+  // appear to someone who was actually invited.
   var BETA_LINK_READY = false;
 
   // Firebase project id. NO API KEY — and that is not an oversight.
@@ -276,30 +508,42 @@
   }
 
   function home() {
-    if (BETA_LINK_READY) {
-      var join = document.getElementById('joinBeta');
-      join.href = INSTALL_URL;
-      join.hidden = false;
-    } else {
-      document.getElementById('betaSoon').hidden = false;
-    }
-    // The h1 already says this better than the footer line does.
+    // Both calls-to-action are the same decision, so they resolve together — a page
+    // where the top button works and the bottom one does not is worse than neither.
+    [['joinBeta', 'betaSoon'], ['joinBetaFoot', 'betaSoonFoot']].forEach(function (pair) {
+      if (BETA_LINK_READY) {
+        var join = document.getElementById(pair[0]);
+        join.href = INSTALL_URL;
+        join.hidden = false;
+      } else {
+        document.getElementById(pair[1]).hidden = false;
+      }
+    });
+
+    // The welcome page is a scrolling document, not a centred card.
+    document.body.className = 'is-home';
+    // The small gold wordmark is the invite view's masthead; the hero has its own.
+    document.getElementById('brandLine').hidden = true;
     document.querySelector('.foot').hidden = true;
+
     // Relax the default-deny robots tag for THIS PATH ONLY. See the head comment: the
     // tag ships as noindex so a non-rendering crawler can never index an invite.
     var robots = document.querySelector('meta[name="robots"]');
     if (robots) robots.setAttribute('content', 'index, follow');
+
     show('home');
   }
 
   // ROUTING, such as it is. Only `/i/…` belongs to the invite flow; everything else is
-  // the home page.
+  // the welcome page.
   //
   // The split is deliberately by PREFIX, not by "does a valid id match". A visitor with
   // a mangled invite link (`/i/` with a broken id) must still meet the invite error, so
   // they know their link is the problem and can ask for another — silently showing them
-  // the home page would hide a broken invite behind a working-looking page. Anything
-  // that is not an invite attempt at all (`/`, `/about`, a typo) gets home.
+  // the welcome page would hide a broken invite behind a working-looking page. Anything
+  // that is not an invite attempt at all (`/`, a typo) gets home. `/privacy` and
+  // `/support` never reach this script at all: they are their own files, and an
+  // exact-match asset wins over the SPA fallback.
   var path = window.location.pathname;
   if (path.indexOf('/i/') !== 0) { home(); return; }
 

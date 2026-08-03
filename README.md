@@ -3,10 +3,24 @@
 The web presence for **Searchlight**. Two audiences, one static HTML file. No backend,
 no framework, no build step.
 
-| Path | Who lands there |
-|---|---|
-| `/` (and anything not `/i/…`) | Someone who found the name on their own, or was told it |
-| `/i/{inviteId}` | Someone a member actually invited |
+| Path | File | Who lands there |
+|---|---|---|
+| `/` (and anything not `/i/…`) | `public/index.html` | Someone who found the name on their own, or was told it |
+| `/i/{inviteId}` | `public/index.html` | Someone a member actually invited |
+| `/privacy` | `public/privacy/index.html` | App Store submission field, and anyone who asks |
+| `/support` | `public/support/index.html` | App Store submission field, and anyone stuck |
+
+`/privacy` and `/support` are their own static files rather than views inside
+`index.html`: an exact-match asset wins over the SPA fallback, so they need no routing
+code, they stay independently linkable for the two App Store fields, and a legal
+document does not have to live inside the marketing page.
+
+### The support address needs a mail route
+
+`support@searchlight.social` is printed on both pages and is the contact of record in
+the privacy policy. **Cloudflare Email Routing** on this domain forwards it to a real
+inbox for free — one rule in the dashboard. Until that exists the address bounces, which
+is worse than having no support page at all.
 
 ## Why the invite page exists
 
@@ -108,9 +122,30 @@ be burned for quota on other Google APIs.
   nobody to email. Capturing addresses would have meant adding a Worker route — the
   one thing that turns this into a service that can fail — to collect a list whose only
   purpose was working around an invite bottleneck the public link removes.
-- **No support or privacy URL yet.** Both are App Store **submission requirements** and
-  this site is where they belong. Cheap to add now, discovered expensively at submission.
 - **No universal links yet** (above).
+
+## The privacy policy is written from the code
+
+`public/privacy/index.html` is not a template. Every collection claim in it traces to
+`PROJECT_DOCUMENTATION/COMMUNITY/APP_STORE_PRIVACY_LABELS.md` in the app repo, which was
+itself reconciled against the SDKs actually initialised in the build and grep-verified —
+including the two negatives that matter: analytics are **not** linked to account
+identity (no `identify()` call exists), and crash reports carry **no** PII (no
+`setUser`, `sendDefaultPii` off).
+
+**When the app's data handling changes, this page changes with it.** A policy that
+drifts from the build is worse than no policy, because it is a written claim rather than
+an omission. Two specific tripwires:
+
+- Shipping the location feature (`BAR_CRAWL_LIVE_LOCATION_UI_ENABLED`) makes "the app
+  does not collect your location" false.
+- Adding `Sentry.setUser` or a PostHog `identify()` makes "not linked to your account"
+  false in two places at once.
+
+The policy also says plainly that ending a Searchlight **hides** the event rather than
+erasing it, because the app has no `deleteDoc` on events — the marketing line "the
+events disappear" is true of the experience and not of the database, and the legal page
+is the wrong place to blur that.
 
 ## Indexing — read before touching the robots tag
 

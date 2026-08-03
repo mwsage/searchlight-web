@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  Searchlight's support page. Required as a URL by App Store Connect, which wants a page
+  a real user can reach that gives them a way to get help.
+
+  A contact route is the only mandatory part; the answers above it exist so that the
+  common questions do not need one. Kept deliberately short — a support page padded with
+  invented FAQs is worse than a thin one, because every answer is a promise about
+  behaviour that has to stay true.
+
+  Its own file, not a view inside index.html: exact-match assets win over the SPA
+  fallback, so /support needs no routing code and stays independently linkable.
+
+  REQUIRES a mail route for support@searchlight.social. Cloudflare Email Routing on this
+  domain forwards it to a real inbox for free; until that rule exists this address
+  bounces, which is worse than no page at all.
+-->
+<title>Support — Searchlight</title>
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    --ground: #000000; --card: #111111; --text: #F2F2F2; --muted: #9DA3AD;
+    --gold: #F2C879; --border-subtle: rgba(255,255,255,0.12); --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ground); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.55;
+    padding: 0 20px calc(56px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  header { padding: 56px 0 32px; border-bottom: 1px solid var(--border-subtle); }
+  .brand {
+    font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin: 0 0 20px;
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  h1 { font-size: clamp(28px, 6vw, 36px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 10px; font-weight: 680; }
+  .sub { font-size: 16px; color: var(--muted); margin: 0; }
+  h2 { font-size: 20px; margin: 40px 0 12px; font-weight: 650; letter-spacing: -0.01em; }
+  h3 { font-size: 16.5px; margin: 22px 0 6px; font-weight: 640; color: var(--text); }
+  p, li { font-size: 16px; color: var(--muted); }
+  p { margin: 0 0 14px; }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  strong { color: var(--text); font-weight: 620; }
+  a { color: var(--gold); }
+  .contact {
+    background: var(--card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius); padding: 22px; margin: 0 0 8px;
+  }
+  .contact p { margin-bottom: 10px; }
+  .contact .addr { font-size: 19px; font-weight: 640; }
+  .contact .addr a { text-decoration: none; }
+  .contact p:last-child { margin-bottom: 0; }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-subtle);
+           display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; }
+  footer a { color: var(--muted); text-decoration: none; padding: 8px 4px; }
+  footer a:hover, footer a:focus-visible { color: var(--text); text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand"><a href="/">Searchlight</a></p>
+    <h1>Support</h1>
+    <p class="sub">Something not working, or a question the app does not answer? Write to
+      us — a person reads it.</p>
+  </header>
+
+  <h2>Get in touch</h2>
+  <div class="contact">
+    <p class="addr"><a href="mailto:support@searchlight.social">support@searchlight.social</a></p>
+    <p>Tell us what you were doing and what happened instead. If you can, include the
+      device you are on and roughly when it occurred — that is usually enough to find it.</p>
+    <p>Searchlight is in beta, so if you have hit something broken, we would rather hear
+      about it than not.</p>
+  </div>
+
+  <h2>Common questions</h2>
+
+  <h3>What is a Searchlight?</h3>
+  <p>It is the signal that something is happening now. You throw one up from a group you
+    are in, add what is happening and where, and everyone in that group gets the heads
+    up. When it is over, you turn it off.</p>
+
+  <h3>How do I invite someone?</h3>
+  <p>Share your group's link, or show them the QR code. If they do not have the app yet,
+    the link takes them to a page that explains what they were invited to and how to get
+    it.</p>
+
+  <h3>Why can only some groups be shared by link?</h3>
+  <p>Link sharing is a public-group feature. In a private group the owner decides who is
+    in it, and a link that anyone can forward would take that decision away from them.
+    Private groups are invited person by person on purpose.</p>
+
+  <h3>Where did my event go?</h3>
+  <p>Events are meant to be temporary. When a Searchlight is turned off the event and its
+    chat stop appearing — the group stays, the plan does not. That is the design, not a
+    bug.</p>
+
+  <h3>How do I turn off analytics?</h3>
+  <p>Settings → the analytics toggle. See the <a href="/privacy">privacy policy</a> for
+    what is collected and what is not.</p>
+
+  <h3>How do I delete my account?</h3>
+  <p>Settings → Delete account. It removes your account and the personal data attached to
+    it, and it cannot be undone. If you cannot reach that screen for any reason, email us
+    and we will do it for you.</p>
+
+  <h3>I am having trouble signing in.</h3>
+  <p>Try the password-reset link on the sign-in screen first. If you signed up with Google
+    or Apple, use that same button rather than a password — the account is tied to it. If
+    you are still stuck, email us with the address or phone number you signed up with.</p>
+
+  <h2>Reporting something serious</h2>
+  <p>If you have seen behaviour in a group that should not be there, or you believe an
+    account belongs to a child under 13, email
+    <a href="mailto:support@searchlight.social">support@searchlight.social</a> and say so
+    in the subject line. Those get looked at first.</p>
+
+  <footer>
+    <a href="/">Home</a>
+    <a href="/privacy">Privacy</a>
+  </footer>
+</main>
+</body>
+</html>

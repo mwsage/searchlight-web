@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  Searchlight's privacy policy. Required as a URL by App Store Connect.
+
+  THIS IS WRITTEN FROM THE CODE, NOT FROM A TEMPLATE. Every collection claim below
+  traces to PROJECT_DOCUMENTATION/COMMUNITY/APP_STORE_PRIVACY_LABELS.md in the app
+  repo, which was itself reconciled against the SDKs actually initialised in the build
+  and grep-verified. When the app's data handling changes, this page changes with it —
+  a privacy policy that drifts from the build is worse than none, because it is a
+  written claim rather than an omission.
+
+  Its own file, not a view inside index.html: exact-match assets win over the SPA
+  fallback, so /privacy needs no routing code, stays independently linkable for the
+  App Store submission field, and keeps a legal document out of the marketing page.
+-->
+<title>Privacy Policy — Searchlight</title>
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    --ground: #000000; --card: #111111; --text: #F2F2F2; --muted: #9DA3AD;
+    --gold: #F2C879; --border-subtle: rgba(255,255,255,0.12); --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ground); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.55;
+    padding: 0 20px calc(56px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  header { padding: 56px 0 32px; border-bottom: 1px solid var(--border-subtle); }
+  .brand {
+    font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin: 0 0 20px;
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  h1 { font-size: clamp(28px, 6vw, 36px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 10px; font-weight: 680; }
+  .updated { font-size: 14px; color: var(--muted); margin: 0; }
+  h2 { font-size: 20px; margin: 40px 0 12px; font-weight: 650; letter-spacing: -0.01em; }
+  h3 { font-size: 16px; margin: 24px 0 8px; font-weight: 640; }
+  p, li { font-size: 16px; color: var(--muted); }
+  p { margin: 0 0 14px; }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  strong { color: var(--text); font-weight: 620; }
+  a { color: var(--gold); }
+  .note {
+    background: var(--card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius); padding: 16px 18px; margin: 0 0 14px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+  th { color: var(--text); font-weight: 620; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+  td { color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-subtle);
+           display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; }
+  footer a { color: var(--muted); text-decoration: none; padding: 8px 4px; }
+  footer a:hover, footer a:focus-visible { color: var(--text); text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand"><a href="/">Searchlight</a></p>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated 3 August 2026</p>
+  </header>
+
+  <p>Searchlight is an app for letting a group of people you already know that something
+    is happening. This policy describes what the app collects, why, and what you can do
+    about it. It describes the app as it is actually built — not what we might add later.</p>
+
+  <h2>What Searchlight collects</h2>
+
+  <h3>Information you give us</h3>
+  <table>
+    <tr>
+      <th>What</th>
+      <th>Why</th>
+    </tr>
+    <tr>
+      <td><strong>Email address</strong>, or <strong>phone number</strong> if you sign in
+        with a phone</td>
+      <td>To create and sign you into your account</td>
+    </tr>
+    <tr>
+      <td><strong>Profile details</strong> — display name, handle, bio, profile photo, and
+        any social media handles you choose to add</td>
+      <td>So the people in your groups know who you are. All of it is optional except a
+        name and handle.</td>
+    </tr>
+    <tr>
+      <td><strong>Your groups and events</strong> — group names and descriptions, the
+        events you create, and messages you send in an event's chat</td>
+      <td>This is the app working. Group members can see it.</td>
+    </tr>
+  </table>
+
+  <h3>Information collected automatically</h3>
+  <table>
+    <tr>
+      <th>What</th>
+      <th>Why</th>
+    </tr>
+    <tr>
+      <td><strong>An account identifier</strong> and, if you allow notifications, a
+        <strong>device push token</strong></td>
+      <td>To keep your data associated with your account and to deliver the notification
+        when someone in your group throws up a Searchlight</td>
+    </tr>
+    <tr>
+      <td><strong>Anonymous usage events</strong> — a short, fixed list of product
+        actions such as "a group was created" or "an invite was accepted"</td>
+      <td>To understand whether the app works. <strong>These are not linked to your
+        account</strong> — see below.</td>
+    </tr>
+    <tr>
+      <td><strong>Crash and performance diagnostics</strong></td>
+      <td>To find and fix bugs. Not linked to your account, and no personal information
+        is attached.</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <p><strong>Analytics are not tied to you.</strong> Searchlight's analytics run on an
+      anonymous identifier generated on your device. The app never sends your account
+      id, email, phone number or name to its analytics provider, so usage events cannot
+      be traced back to your account. You can also turn analytics off entirely in
+      <strong>Settings</strong>.</p>
+  </div>
+
+  <h2>What Searchlight does not collect</h2>
+  <ul>
+    <li><strong>Your location.</strong> The app does not request or collect location. When
+      you say where something is happening, that is text you typed, not a reading from
+      your device.</li>
+    <li><strong>Advertising identifiers.</strong> There is no IDFA, no ad tracking, and no
+      tracking of you across other companies' apps or websites.</li>
+    <li><strong>Your contacts.</strong> Searchlight does not read your address book. You
+      invite people by sharing a link.</li>
+  </ul>
+
+  <h2>Who else sees your information</h2>
+
+  <p><strong>Other people in Searchlight.</strong> Your profile is visible to people in
+    your groups. Anything you post in a group or an event chat is visible to the members
+    of that group. A public group can be found and joined by anyone with its link.</p>
+
+  <p><strong>Service providers who run the app for us.</strong> Searchlight uses a small
+    number of companies to operate. They process data on our instructions and for no
+    purpose of their own:</p>
+  <ul>
+    <li><strong>Google Firebase</strong> — accounts and sign-in, the database that stores
+      your groups, events and messages, file storage for photos, and push notifications.</li>
+    <li><strong>PostHog</strong> — the anonymous product analytics described above.</li>
+    <li><strong>Sentry</strong> — crash and performance diagnostics.</li>
+  </ul>
+
+  <p><strong>Nobody else.</strong> Searchlight does not sell your information, does not
+    share it with advertisers, and does not trade it. If we are ever legally compelled to
+    disclose something, we will do so only to the extent required.</p>
+
+  <h2>How long it is kept</h2>
+
+  <p>Your account, profile and groups are kept for as long as your account exists.</p>
+
+  <div class="note">
+    <p><strong>An honest note about events.</strong> When a Searchlight ends, the event
+      and its chat stop appearing in the app — that is the product working the way it is
+      meant to. It is not the same as erasure: those records remain stored on your
+      account until you delete your account, at which point they go with it. We would
+      rather say this plainly than let "the events disappear" imply something the
+      database does not do.</p>
+  </div>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li><strong>Delete your account.</strong> Settings → Delete account. This removes your
+      account and the personal data attached to it. It cannot be undone.</li>
+    <li><strong>Turn off analytics.</strong> Settings → the analytics toggle. The app stops
+      sending usage events.</li>
+    <li><strong>Turn off notifications.</strong> Your device's system settings, at any
+      time.</li>
+    <li><strong>Edit or remove your profile details.</strong> Anything optional — photo,
+      bio, social handles — can be changed or cleared in the app.</li>
+    <li><strong>Leave a group.</strong> You can leave any group you are in.</li>
+  </ul>
+
+  <p>If you want a copy of your data, or you have a request this list does not cover,
+    email <a href="mailto:support@searchlight.social">support@searchlight.social</a> and
+    we will handle it directly.</p>
+
+  <h2>Children</h2>
+  <p>Searchlight is not directed at children under 13, and we do not knowingly collect
+    information from them. If you believe a child has created an account, email us and we
+    will remove it.</p>
+
+  <h2>Security</h2>
+  <p>Data is transmitted over encrypted connections and stored with our service providers
+    under access rules that restrict who can read what. No service can promise perfect
+    security, and we will not pretend otherwise — but access to your groups and messages
+    is enforced on the server, not merely hidden in the app.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If what the app collects changes, this page changes with it and the date at the top
+    is updated. Material changes will be surfaced in the app rather than quietly posted
+    here.</p>
+
+  <h2>Contact</h2>
+  <p><a href="mailto:support@searchlight.social">support@searchlight.social</a></p>
+
+  <footer>
+    <a href="/">Home</a>
+    <a href="/support">Support</a>
+  </footer>
+</main>
+</body>
+</html>
