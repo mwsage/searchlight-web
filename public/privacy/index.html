@@ -137,15 +137,35 @@
       <strong>Settings</strong>.</p>
   </div>
 
+  <h2>Location</h2>
+
+  <p>Where you say something is happening is <strong>text you typed</strong>, not a reading
+    from your device. Typing "the lounge at 7" shares no location data at all, and that is
+    how Searchlight works by default.</p>
+
+  <p>Separately, Searchlight contains an <strong>optional live location sharing</strong>
+    feature for an event you created. It is <strong>off unless you turn it on</strong>, it
+    only ever applies to your own events, and while it is on your device's coordinates are
+    sent periodically so the group can find you — stopping when the event ends or when you
+    turn it off. Searchlight never collects your location in the background, and never for
+    an event someone else created.</p>
+
+  <div class="note">
+    <p>Being precise about this: as of this version the control to switch live location
+      sharing on is <strong>not present in the app</strong>, so in practice it does not
+      run. We describe the capability rather than omitting it, because the code ships in
+      the app and you deserve to know what it can do — not only what today's screens
+      expose.</p>
+  </div>
+
   <h2>What Searchlight does not collect</h2>
   <ul>
-    <li><strong>Your location.</strong> The app does not request or collect location. When
-      you say where something is happening, that is text you typed, not a reading from
-      your device.</li>
     <li><strong>Advertising identifiers.</strong> There is no IDFA, no ad tracking, and no
       tracking of you across other companies' apps or websites.</li>
     <li><strong>Your contacts.</strong> Searchlight does not read your address book. You
       invite people by sharing a link.</li>
+    <li><strong>Background location.</strong> Nothing about Searchlight tracks where you
+      are when you are not using it.</li>
   </ul>
 
   <h2>Who else sees your information</h2>
