@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  INV-2 — the Searchlight invite landing.
+
+  Why this page exists: Searchlight's invite link was `searchlight:///group/{id}`, a
+  CUSTOM SCHEME. That is not a web address — pasted into Messages it does not open a
+  browser, does not offer the App Store, and for a recipient without the app it
+  silently does nothing. A member inviting a friend was sending a dead string.
+
+  This page is the https address that can actually be tapped. It reads the public
+  invite projection, shows the recipient what they were invited to, and routes them
+  either into the app or to the install.
+
+  DESIGN NOTE: the destination lives in ONE constant (INSTALL_URL). It points at
+  TestFlight during beta and at the App Store at launch — changing it is a one-line
+  edit to this page, never an app release.
+-->
+<title>You're invited — Searchlight</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="You're invited to a group on Searchlight">
+<meta property="og:description" content="Searchlight lets a group know when someone's out and hosting.">
+<meta property="og:type" content="website">
+<style>
+  /* Tokens mirrored from the app (app/constants/designTokens.ts) so the page and the
+     product read as one thing. Dark is the default and the only mode: Searchlight is a
+     night app and ships a single theme. */
+  :root {
+    --ground: #000000;
+    --card: #111111;
+    --text: #F2F2F2;
+    --muted: #9DA3AD;
+    --gold: #F2C879;
+    --primary: #007AFF;
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --pill-border: #2A3F5C;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+    line-height: 1.45;
+  }
+  main { width: 100%; max-width: 420px; }
+  .brand {
+    font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); text-align: center; margin-bottom: 28px; font-weight: 600;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+  }
+  .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+  h1 { font-size: 24px; line-height: 1.25; margin: 0 0 10px; font-weight: 650; }
+  .desc { font-size: 15px; color: var(--muted); margin: 0 0 16px; }
+  .pill {
+    display: inline-block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid var(--pill-border); color: var(--muted);
+    border-radius: 999px; padding: 4px 10px; margin-bottom: 18px;
+  }
+  .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  a.btn {
+    display: block; text-align: center; text-decoration: none;
+    padding: 14px 16px; border-radius: var(--radius); font-size: 16px; font-weight: 600;
+    min-height: 44px; /* HIG touch target */
+  }
+  a.primary { background: var(--gold); color: #000; }
+  a.secondary { background: transparent; color: var(--text); border: 1px solid var(--border-subtle); }
+  .foot { font-size: 13px; color: var(--muted); text-align: center; margin-top: 18px; }
+  .skeleton { height: 15px; border-radius: 6px; background: rgba(255,255,255,0.07); margin: 10px 0; }
+  .skeleton.wide { width: 70%; } .skeleton.narrow { width: 40%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Searchlight</div>
+
+  <!-- Loading: a skeleton, not a spinner — mirrors the app's loading treatment. -->
+  <section id="loading" class="card" aria-busy="true" aria-live="polite">
+    <div class="skeleton narrow"></div>
+    <div class="skeleton wide"></div>
+    <div class="skeleton"></div>
+  </section>
+
+  <!-- Valid invite -->
+  <section id="invite" class="card" hidden>
+    <p class="eyebrow" id="inviter"></p>
+    <h1 id="groupName"></h1>
+    <p class="desc" id="groupDesc" hidden></p>
+    <span class="pill" id="visibility" hidden></span>
+    <div class="actions">
+      <a class="btn primary" id="install" href="#">Get Searchlight</a>
+      <a class="btn secondary" id="open" href="#">I already have the app</a>
+    </div>
+  </section>
+
+  <!--
+    Invalid / expired. Mirrors the in-app C-11 soft landing rather than showing a raw
+    error: someone who was invited by a friend should never meet a stack trace.
+  -->
+  <section id="invalid" class="card" hidden>
+    <h1>This invite link isn't valid</h1>
+    <p class="desc">It may have been removed, or the link may be incomplete. Ask whoever
+      invited you to send it again.</p>
+    <div class="actions">
+      <a class="btn secondary" id="installFallback" href="#">Get Searchlight</a>
+    </div>
+  </section>
+
+  <p class="foot">Searchlight lets a group know when someone's out and hosting.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // THE ONE CONSTANT THAT CHANGES BETWEEN BETA AND LAUNCH.
+  // Beta: the TestFlight PUBLIC link (App Store Connect -> external test group ->
+  // enable public link; available only AFTER a build passes Beta App Review).
+  // Launch: the App Store URL. Editing this line re-points every invite in the wild
+  // without an app release.
+  // ---------------------------------------------------------------------------
+  var INSTALL_URL = 'https://testflight.apple.com/';   // TODO: paste the public link
+
+  // Firebase project id. NO API KEY — and that is not an oversight.
+  //
+  // `groupInvitePreviews` is `allow get: if true` / `allow list: if false`, written
+  // server-side only by the onGroupInviteCreated trigger, so the Firestore REST API
+  // serves it to an anonymous caller with no credential at all. Verified 2026-08-03:
+  // an unauthenticated GET with no key returns 404 for a missing doc, i.e. the read is
+  // permitted and the document simply is not there.
+  //
+  // An earlier version embedded the Android client key from google-services.json.
+  // Firebase client keys are public identifiers rather than secrets — that one already
+  // ships inside every app binary — but it was UNNECESSARY here, and an unnecessary
+  // credential in a public repo is still worth removing: GitHub's scanner flags it, and
+  // an unrestricted key can be burned for quota on other Google APIs even though it
+  // grants no data access. Do not re-add one; if a read ever 403s, the cause is the
+  // rules, not a missing key.
+  var PROJECT_ID = 'spotlightapp-1bf91';
+
+  // Opens the app on the INVITE, not on the group.
+  //
+  // `searchlight:///group/{groupId}` would land a returning visitor on group detail —
+  // which has no join affordance at all, so they could look at the group and not join
+  // it. The invite route carries the context ("@alex invited you to…") and, since
+  // INV-9, completes the join itself: joinPublicGroup for a public group (reusable, so
+  // the next person to follow the same link can still join), acceptGroupInvite for a
+  // private one.
+  var APP_SCHEME = 'searchlight:///invite/';
+
+  function show(id) {
+    ['loading', 'invite', 'invalid'].forEach(function (s) {
+      document.getElementById(s).hidden = (s !== id);
+    });
+  }
+
+  function invalid() {
+    document.getElementById('installFallback').href = INSTALL_URL;
+    show('invalid');
+  }
+
+  // /i/{inviteId} — the id is the unguessable token, and the collection is
+  // non-enumerable, which is why the URL is keyed by invite rather than by group.
+  var m = window.location.pathname.match(/\/i\/([A-Za-z0-9_-]+)\/?$/);
+  if (!m) { invalid(); return; }
+  var inviteId = m[1];
+
+  var url = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID +
+            '/databases/(default)/documents/groupInvitePreviews/' +
+            encodeURIComponent(inviteId);
+
+  fetch(url)
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (doc) {
+      var f = (doc && doc.fields) || {};
+      var str = function (k) { return f[k] && f[k].stringValue ? f[k].stringValue : ''; };
+
+      var groupId = str('groupId');
+      var name = str('groupName');
+      if (!groupId || !name) return invalid();
+
+      document.getElementById('groupName').textContent = name;
+
+      var handle = str('inviterHandle');
+      document.getElementById('inviter').textContent =
+        handle ? '@' + handle.replace(/^@/, '') + ' invited you to' : 'You were invited to';
+
+      var desc = str('groupDescription');
+      if (desc) {
+        var d = document.getElementById('groupDesc');
+        d.textContent = desc;
+        d.hidden = false;
+      }
+
+      // ROLE, NEVER IDENTITY beyond the inviter's own handle: the projection carries
+      // no member list and no owner name, and this page must not infer either.
+      var vis = str('visibility');
+      if (vis) {
+        var v = document.getElementById('visibility');
+        v.textContent = vis === 'private' ? 'Private group' : 'Public group';
+        v.hidden = false;
+      }
+
+      document.getElementById('install').href = INSTALL_URL;
+      // Both buttons always render: a web page cannot reliably detect whether the app
+      // is installed, and guessing wrong strands the visitor with the wrong one.
+      document.getElementById('open').href = APP_SCHEME + encodeURIComponent(inviteId);
+
+      show('invite');
+    })
+    .catch(invalid);
+})();
+</script>
+</body>
+</html>

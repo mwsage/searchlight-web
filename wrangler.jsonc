@@ -1,0 +1,30 @@
+{
+  // Searchlight's invite landing — a STATIC site, no server code.
+  //
+  // Cloudflare's current flow creates a Worker rather than a classic Pages project,
+  // so this is a Worker whose only job is serving ./public. There is deliberately no
+  // `main` script: adding one would turn a page that cannot break into a service that
+  // can.
+  "name": "searchlight-web",
+  "compatibility_date": "2026-08-02",
+
+  // Both were being enabled implicitly, which Wrangler warns about. Stated
+  // explicitly so the deployment surface is a decision rather than a default.
+  //
+  // workers_dev: KEPT ON deliberately. searchlight-web.mwsage.workers.dev is the only
+  // way to open this page before DNS is attached, and it stays useful afterwards for
+  // checking a deploy without touching the real domain. It is safe to leave: the page
+  // carries `noindex, nofollow`, so a second address cannot fragment search results.
+  "workers_dev": true,
+
+  // preview_urls: OFF. Every non-production branch would otherwise get its own public
+  // URL. An invite page has no audience for a half-finished variant, and each extra
+  // address is one more thing that can be shared by accident.
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public",
+    // Every path serves index.html, so /i/{inviteId} works without routing code.
+    // The page reads the invite id from location.pathname itself.
+    "not_found_handling": "single-page-application"
+  }
+}
