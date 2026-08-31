@@ -5,8 +5,9 @@ no framework, no build step.
 
 | Path | File | Who lands there |
 |---|---|---|
-| `/` (and anything not `/i/…`) | `public/index.html` | Someone who found the name on their own, or was told it |
+| `/` (and anything not `/i/…` or `/e/…`) | `public/index.html` | Someone who found the name on their own, or was told it |
 | `/i/{inviteId}` | `public/index.html` | Someone a member actually invited |
+| `/e/{eventId}` | `public/index.html` | Someone who tapped an event share link |
 | `/privacy` | `public/privacy/index.html` | App Store submission field, and anyone who asks |
 | `/support` | `public/support/index.html` | App Store submission field, and anyone stuck |
 

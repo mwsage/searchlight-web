@@ -14,7 +14,11 @@
      it reads the public invite projection, shows the recipient what they were invited
      to, and routes them into the app or to the install.
 
-  2. `/` — the welcome page. Before this existed, every path served the invite view, so
+  2. `/e/{eventId}` — EVD-3 event share. The app copies `https://searchlight.social/e/{id}`.
+     Until Universal Links ship, Safari opens this page; "I already have the app" uses
+     `searchlight:///event/{id}` so a development or TestFlight install can take over.
+
+  3. `/` — the welcome page. Before this existed, every path served the invite view, so
      anyone who reached searchlight.social on their own — or was told the name rather
      than sent a link — was greeted by "This invite link isn't valid". The product read
      as broken to exactly the people arriving with the most curiosity and the least
@@ -460,6 +464,17 @@
 
   </section>
 
+  <!-- Event share. No public Firestore projection yet — open-in-app + install only. -->
+  <section id="event" class="card" hidden>
+    <p class="eyebrow">Event</p>
+    <h1>Open this event in Searchlight</h1>
+    <p class="desc">You were sent a link to an event. Open it in the app if you already have Searchlight.</p>
+    <div class="actions">
+      <a class="btn primary" id="eventInstall" href="#">Get Searchlight</a>
+      <a class="btn secondary" id="eventOpen" href="#">I already have the app</a>
+    </div>
+  </section>
+
   <!-- Loading: a skeleton, not a spinner — mirrors the app's loading treatment. -->
   <section id="loading" class="card" aria-busy="true" aria-live="polite">
     <div class="skeleton narrow"></div>
@@ -543,9 +558,10 @@
   // the next person to follow the same link can still join), acceptGroupInvite for a
   // private one.
   var APP_SCHEME = 'searchlight:///invite/';
+  var EVENT_SCHEME = 'searchlight:///event/';
 
   function show(id) {
-    ['home', 'loading', 'invite', 'invalid'].forEach(function (s) {
+    ['home', 'loading', 'invite', 'invalid', 'event'].forEach(function (s) {
       document.getElementById(s).hidden = (s !== id);
     });
   }
@@ -582,17 +598,25 @@
     show('home');
   }
 
-  // ROUTING, such as it is. Only `/i/…` belongs to the invite flow; everything else is
-  // the welcome page.
+  // ROUTING, such as it is. `/i/…` is the invite flow. `/e/…` is the event-share
+  // landing. Everything else is the welcome page.
   //
   // The split is deliberately by PREFIX, not by "does a valid id match". A visitor with
   // a mangled invite link (`/i/` with a broken id) must still meet the invite error, so
   // they know their link is the problem and can ask for another — silently showing them
-  // the welcome page would hide a broken invite behind a working-looking page. Anything
-  // that is not an invite attempt at all (`/`, a typo) gets home. `/privacy` and
-  // `/support` never reach this script at all: they are their own files, and an
-  // exact-match asset wins over the SPA fallback.
+  // the welcome page would hide a broken invite behind a working-looking page. Same for
+  // `/e/`. Anything that is not an invite or event attempt (`/`, a typo) gets home.
+  // `/privacy` and `/support` never reach this script at all: they are their own files,
+  // and an exact-match asset wins over the SPA fallback.
   var path = window.location.pathname;
+  if (path.indexOf('/e/') === 0) {
+    var em = path.match(/\/e\/([A-Za-z0-9_-]+)\/?$/);
+    if (!em) { invalid(); return; }
+    document.getElementById('eventInstall').href = INSTALL_URL;
+    document.getElementById('eventOpen').href = EVENT_SCHEME + encodeURIComponent(em[1]);
+    show('event');
+    return;
+  }
   if (path.indexOf('/i/') !== 0) { home(); return; }
 
   // /i/{inviteId} — the id is the unguessable token, and the collection is

@@ -15,9 +15,10 @@ const privacy = readFileSync(url('../public/privacy/index.html'), 'utf8');
 const support = readFileSync(url('../public/support/index.html'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const SECTIONS = ['home', 'loading', 'invite', 'invalid'];
+const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
 const IDS = [...SECTIONS, 'joinBeta', 'betaSoon', 'joinBetaMid', 'betaSoonMid', 'joinBetaFoot', 'betaSoonFoot',
              'brandLine', 'install', 'open', 'installFallback',
+             'eventInstall', 'eventOpen',
              'inviter', 'groupName', 'groupDesc', 'visibility'];
 
 function run(pathname) {
@@ -42,6 +43,7 @@ function run(pathname) {
   const visible = SECTIONS.filter((s) => !els[s].hidden);
   return { visible, robots: robots.content, footHidden: foot.hidden, fetched,
            bodyClass: body.className,
+           eventOpen: els.eventOpen.href,
            joins: [els.joinBeta, els.joinBetaMid, els.joinBetaFoot].map((e) => (e.hidden ? null : e.href)),
            soons: [els.betaSoon, els.betaSoonMid, els.betaSoonFoot].map((e) => !e.hidden) };
 }
@@ -60,6 +62,9 @@ for (const [path, expect] of [
   ['/i/',          'invalid'],   // an invite attempt with no id
   ['/i/BAD ID',    'invalid'],
   ['/i/abc123',    'loading'],   // invite path: fetch fires, view resolves async
+  ['/e',           'home'],
+  ['/e/',          'invalid'],
+  ['/e/ev_abc123', 'event'],
 ]) {
   const r = run(path);
   const got = r.visible.length === 1 ? r.visible[0] : `[${r.visible}]`;
@@ -78,6 +83,11 @@ assert('support page is indexable', /content="index, follow"/.test(support));
 console.log('\n--- welcome page behaviour ---');
 assert('home never fetches', homeR.fetched === null);
 assert('invite path does fetch', inviteR.fetched !== null);
+const eventR = run('/e/ev_abc123');
+assert('event path never fetches', eventR.fetched === null);
+assert('event path stays noindex', eventR.robots === 'noindex, nofollow');
+assert('event open uses the app scheme',
+       eventR.eventOpen === 'searchlight:///event/ev_abc123');
 assert('home swaps body to the scrolling layout', homeR.bodyClass === 'is-home');
 assert('invite path leaves the centred layout alone', inviteR.bodyClass === '');
 assert('BOTH beta CTAs resolve together — never one live and one dead',
