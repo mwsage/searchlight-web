@@ -16,7 +16,7 @@ const support = readFileSync(url('../public/support/index.html'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const SECTIONS = ['home', 'loading', 'invite', 'invalid'];
-const IDS = [...SECTIONS, 'joinBeta', 'betaSoon', 'joinBetaFoot', 'betaSoonFoot',
+const IDS = [...SECTIONS, 'joinBeta', 'betaSoon', 'joinBetaMid', 'betaSoonMid', 'joinBetaFoot', 'betaSoonFoot',
              'brandLine', 'install', 'open', 'installFallback',
              'inviter', 'groupName', 'groupDesc', 'visibility'];
 
@@ -42,8 +42,8 @@ function run(pathname) {
   const visible = SECTIONS.filter((s) => !els[s].hidden);
   return { visible, robots: robots.content, footHidden: foot.hidden, fetched,
            bodyClass: body.className,
-           joins: [els.joinBeta, els.joinBetaFoot].map((e) => (e.hidden ? null : e.href)),
-           soons: [els.betaSoon, els.betaSoonFoot].map((e) => !e.hidden) };
+           joins: [els.joinBeta, els.joinBetaMid, els.joinBetaFoot].map((e) => (e.hidden ? null : e.href)),
+           soons: [els.betaSoon, els.betaSoonMid, els.betaSoonFoot].map((e) => !e.hidden) };
 }
 
 let failed = 0;

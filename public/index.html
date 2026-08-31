@@ -329,15 +329,15 @@
     </section>
 
     <div class="closing">
-      <h2>Send the signal.</h2>
+      <h2>Try it out.</h2>
       <ul class="beats strong">
         <li>Create your group.</li>
         <li>Throw up a Searchlight.</li>
-        <li>See who shows.</li>
+        <li>Connect with your group.</li>
       </ul>
       <div class="actions">
-        <a class="btn primary" id="joinBetaFoot" href="#" hidden>Join the beta</a>
-        <p class="soon" id="betaSoonFoot" hidden>The beta opens shortly.</p>
+        <a class="btn primary" id="joinBetaMid" href="#" hidden>Join the beta</a>
+        <p class="soon" id="betaSoonMid" hidden>The beta opens shortly.</p>
       </div>
     </div>
 
@@ -437,11 +437,11 @@
     </section>
 
     <div class="closing">
-      <h2>Send the signal.</h2>
+      <h2>Be the one, we made it easy.</h2>
       <ul class="beats strong">
         <li>Create your group.</li>
         <li>Throw up a Searchlight.</li>
-        <li>See who shows.</li>
+        <li>See your friends.</li>
       </ul>
       <div class="actions">
         <a class="btn primary" id="joinBetaFoot" href="#" hidden>Join the beta</a>
@@ -555,7 +555,7 @@
   function home() {
     // Both calls-to-action are the same decision, so they resolve together — a page
     // where the top button works and the bottom one does not is worse than neither.
-    [['joinBeta', 'betaSoon'], ['joinBetaFoot', 'betaSoonFoot']].forEach(function (pair) {
+    [['joinBeta', 'betaSoon'], ['joinBetaMid', 'betaSoonMid'], ['joinBetaFoot', 'betaSoonFoot']].forEach(function (pair) {
       if (BETA_LINK_READY) {
         var join = document.getElementById(pair[0]);
         join.href = INSTALL_URL;
