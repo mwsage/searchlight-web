@@ -192,6 +192,9 @@
   .closing h2 { font-size: clamp(26px, 6vw, 34px); margin: 0 0 20px; }
   .closing .beats { display: inline-block; text-align: left; }
   .closing .actions { max-width: 320px; margin: 28px auto 0; }
+  /* A mid-page closing sits above the next section's border, not the sitefoot's
+     40px margin — so it needs its own bottom room to match the footer CTA's spacing. */
+  .closing-mid { padding-bottom: 48px; }
 
   /* Honest stand-in for the button while the beta link does not exist yet — see
      BETA_LINK_READY in the script. */
@@ -328,7 +331,7 @@
       </ol>
     </section>
 
-    <div class="closing">
+    <div class="closing closing-mid">
       <h2>Try it out.</h2>
       <ul class="beats strong">
         <li>Create your group.</li>
