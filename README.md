@@ -114,16 +114,17 @@ be burned for quota on other Google APIs.
 
 ## What is deliberately not here
 
-- **No universal links yet.** `ios.associatedDomains` + an
-  `apple-app-site-association` file would let the `https` link open the app directly
-  instead of bouncing through Safari. It is a later tap-saver, not required.
+- **Universal links: web half shipped, app half pending a build.**
+  `public/.well-known/apple-app-site-association` claims `/i/*` and `/e/*` and is served as
+  JSON via `_headers`. The app still needs `ios.associatedDomains` + routing `/i/`+`/e/` to
+  the invite and event screens, plus a rebuild, before the `https` link opens the app
+  directly; until then it opens this page and the "I already have the app" button hands off.
 - **No analytics.** Nothing here should track a person who has not installed anything.
 - **No waiting list, no email capture.** Decided 2026-08-03: the beta is reached by a
   TestFlight **public link**, so anyone holding it installs directly and there is
   nobody to email. Capturing addresses would have meant adding a Worker route — the
   one thing that turns this into a service that can fail — to collect a list whose only
   purpose was working around an invite bottleneck the public link removes.
-- **No universal links yet** (above).
 
 ## The privacy policy is written from the code
 

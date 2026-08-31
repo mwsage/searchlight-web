@@ -1,0 +1,6 @@
+# Apple fetches the app-site-association file and expects JSON. It has no file
+# extension, so set the type explicitly rather than letting it default to
+# application/octet-stream. Only /i/* and /e/* are claimed as universal links
+# (see the file itself); the home, privacy, and support pages stay web pages.
+/.well-known/apple-app-site-association
+  Content-Type: application/json

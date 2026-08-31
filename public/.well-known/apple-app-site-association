@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["76AW6N85V6.com.searchlight.app"],
+        "components": [
+          { "/": "/i/*", "comment": "Group invite links open the app" },
+          { "/": "/e/*", "comment": "Event share links open the app" }
+        ]
+      }
+    ]
+  }
+}
