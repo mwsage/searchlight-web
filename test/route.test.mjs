@@ -13,6 +13,7 @@ const url = (p) => new URL(p, import.meta.url);
 const html = readFileSync(url('../public/index.html'), 'utf8');
 const privacy = readFileSync(url('../public/privacy/index.html'), 'utf8');
 const support = readFileSync(url('../public/support/index.html'), 'utf8');
+const aasa = JSON.parse(readFileSync(url('../public/.well-known/apple-app-site-association'), 'utf8'));
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
@@ -108,5 +109,29 @@ assert('support address appears on both standalone pages',
        support.includes('support@searchlight.social'));
 assert('welcome page links to privacy and support',
        html.includes('href="/privacy"') && html.includes('href="/support"'));
+
+// Universal links. This file is the ONLY thing that decides whether a tapped
+// searchlight.social/i/... opens the app or the website, and it fails silently:
+// a missing appID does not error anywhere, the link just opens Safari. It went
+// unnoticed for the whole life of Searchlight Dev, which could never test a link
+// flow because only the production bundle id was listed.
+const APP_IDS = aasa.applinks.details[0].appIDs;
+const PATHS = aasa.applinks.details[0].components.map((c) => c['/']);
+
+assert('AASA claims the production app id',
+       APP_IDS.includes('76AW6N85V6.com.searchlight.app'));
+assert('AASA claims the DEV app id, so links are testable before they ship',
+       APP_IDS.includes('76AW6N85V6.com.searchlight.app.dev'));
+assert('every AASA app id carries the team prefix',
+       APP_IDS.every((id) => id.startsWith('76AW6N85V6.')));
+assert('AASA app ids are unique',
+       new Set(APP_IDS).size === APP_IDS.length);
+// The two link shapes the app actually mints (groupDeepLink / event share).
+assert('AASA claims the invite path', PATHS.includes('/i/*'));
+assert('AASA claims the event path', PATHS.includes('/e/*'));
+// A bare "*" would hand every page on the domain to the app, including /privacy
+// and /support — the two URLs App Review opens in a browser.
+assert('AASA does not claim the whole domain',
+       !PATHS.includes('*') && !PATHS.includes('/*'));
 
 process.exit(failed ? 1 : 0);

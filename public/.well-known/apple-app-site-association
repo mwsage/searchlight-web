@@ -2,11 +2,21 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["76AW6N85V6.com.searchlight.app"],
+        "appIDs": [
+          "76AW6N85V6.com.searchlight.app",
+          "76AW6N85V6.com.searchlight.app.dev"
+        ],
         "components": [
-          { "/": "/i/*", "comment": "Group invite links open the app" },
-          { "/": "/e/*", "comment": "Event share links open the app" }
-        ]
+          {
+            "/": "/i/*",
+            "comment": "Group invite links open the app"
+          },
+          {
+            "/": "/e/*",
+            "comment": "Event share links open the app"
+          }
+        ],
+        "comment": "Both app identities claim these paths. Searchlight Dev is the same codebase on a different bundle id, so a link that cannot be tested in dev cannot be tested before it ships."
       }
     ]
   }
