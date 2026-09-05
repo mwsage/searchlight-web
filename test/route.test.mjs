@@ -157,5 +157,28 @@ assert('the support page is allowed', has('Allow: /support'));
 // The allow-list must not accidentally re-open the unlisted paths.
 assert('no Allow rule re-opens an unlisted link',
        !directives.some((d) => /^Allow:\s*\/(i|e)\//.test(d.trim())));
+// EXACTLY ONE wildcard group. Cloudflare's managed block was a second
+// `User-agent: *` carrying `Allow: /`, which cancelled the catch-all above —
+// merging crawlers break a tie toward the least restrictive rule, and
+// first-match crawlers never reach the second group at all.
+assert('there is exactly one User-agent: * group',
+       directives.filter((d) => d.trim() === 'User-agent: *').length === 1);
+// The AI-crawler blocks Cloudflare used to supply, now versioned here instead of
+// living in a dashboard toggle nothing can test.
+for (const bot of ['Amazonbot', 'Applebot-Extended', 'Bytespider', 'CCBot',
+                   'ClaudeBot', 'Google-Extended', 'GPTBot', 'meta-externalagent']) {
+  assert(`${bot} is disallowed`, has(`User-agent: ${bot}`));
+}
+// A named group whose next line is not `Disallow: /` blocks nothing — the bot
+// matches its own group, finds no rule, and crawls freely.
+for (let i = 0; i < directives.length; i++) {
+  const line = directives[i].trim();
+  if (line.startsWith('User-agent: ') && line !== 'User-agent: *') {
+    assert(`${line} is followed by a rule that blocks it`,
+           (directives[i + 1] || '').trim() === 'Disallow: /');
+  }
+}
+assert('the content signal permits search and refuses training',
+       /^Content-Signal:.*search=yes/m.test(robots) && /ai-train=no/.test(robots));
 
 process.exit(failed ? 1 : 0);

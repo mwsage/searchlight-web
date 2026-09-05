@@ -18,7 +18,48 @@
 # The home page, privacy policy and support page are public and meant to be
 # found — /privacy and /support are the two URLs App Review opens in a browser.
 
+# AI CRAWLERS. Cloudflare's managed robots.txt used to add this group and was
+# turned off on 2026-09-05 because its `User-agent: * / Allow: /` sat above the
+# rules below and cancelled the catch-all — two wildcard groups, and on a tie the
+# least restrictive wins. Turning it off restored the catch-all and took these
+# with it, so they are re-stated here, in the file, where they are versioned and
+# testable rather than living in a dashboard toggle.
+#
+# Content-Signal is the declaration that accompanies them: findable by search,
+# not usable as training data.
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+# Everyone else. ONE wildcard group, deliberately. Cloudflare's managed block was
+# a SECOND `User-agent: *` carrying `Allow: /`, and a duplicate wildcard is how
+# the catch-all below gets cancelled — crawlers that merge groups resolve a tie
+# in favour of the least restrictive rule, and crawlers that take the first match
+# never reach this one. If anything is ever added here, add it to this group.
+
 User-agent: *
+Content-Signal: search=yes, ai-train=no
 Disallow: /i/
 Disallow: /e/
 Allow: /$
