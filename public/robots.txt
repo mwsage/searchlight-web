@@ -1,0 +1,27 @@
+# searchlight.social
+#
+# WHY THIS FILE EXISTS. Every path on this domain returns 200 with the full page:
+# wrangler.jsonc sets not_found_handling: "single-page-application" so /i/{id}
+# works without routing code, which means a crawler never meets a 404 and has
+# nothing telling it where to stop. Measured 2026-09-05 — /wp-admin, /.env and
+# random junk paths all serve the complete home page. This file is the only
+# signal a well-behaved crawler gets, and 12,816 pageviews in the domain's first
+# month were overwhelmingly probes finding a 200 everywhere they looked.
+#
+# WHY /i/ AND /e/ ARE CLOSED. They are unlisted invite and event links, shared
+# person to person, and a crawler walking them would put group names into search
+# results. index.html already ships `noindex, nofollow` by default and only
+# relaxes it for the home path, so a crawler that does not render JavaScript can
+# never index an invite. This is the other half of that: keep compliant crawlers
+# off the paths entirely rather than trusting them to render a meta tag.
+#
+# The home page, privacy policy and support page are public and meant to be
+# found — /privacy and /support are the two URLs App Review opens in a browser.
+
+User-agent: *
+Disallow: /i/
+Disallow: /e/
+Allow: /$
+Allow: /privacy
+Allow: /support
+Disallow: /

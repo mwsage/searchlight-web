@@ -14,6 +14,7 @@ const html = readFileSync(url('../public/index.html'), 'utf8');
 const privacy = readFileSync(url('../public/privacy/index.html'), 'utf8');
 const support = readFileSync(url('../public/support/index.html'), 'utf8');
 const aasa = JSON.parse(readFileSync(url('../public/.well-known/apple-app-site-association'), 'utf8'));
+const robots = readFileSync(url('../public/robots.txt'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
@@ -133,5 +134,28 @@ assert('AASA claims the event path', PATHS.includes('/e/*'));
 // and /support — the two URLs App Review opens in a browser.
 assert('AASA does not claim the whole domain',
        !PATHS.includes('*') && !PATHS.includes('/*'));
+
+// robots.txt. It has to be a real FILE: an exact-match asset beats the SPA
+// fallback (the same reason /privacy and /support are their own files), and
+// without one this path served the home page as if it were a robots policy.
+const directives = robots.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+const has = (line) => directives.some((d) => d.trim() === line);
+
+assert('robots.txt is directives, not the fallback page',
+       !robots.includes('<!DOCTYPE') && !robots.includes('<html'));
+assert('robots.txt applies to every crawler', has('User-agent: *'));
+// Unlisted links. A crawler walking these would put group names in search results.
+assert('invite links are disallowed', has('Disallow: /i/'));
+assert('event links are disallowed', has('Disallow: /e/'));
+// Every unknown path returns 200 here, so the catch-all is what stops a crawler
+// walking probe paths forever.
+assert('everything else is disallowed by default', has('Disallow: /'));
+// The three pages that ARE public — /privacy and /support are App Store fields.
+assert('the home page is allowed', has('Allow: /$'));
+assert('the privacy page is allowed', has('Allow: /privacy'));
+assert('the support page is allowed', has('Allow: /support'));
+// The allow-list must not accidentally re-open the unlisted paths.
+assert('no Allow rule re-opens an unlisted link',
+       !directives.some((d) => /^Allow:\s*\/(i|e)\//.test(d.trim())));
 
 process.exit(failed ? 1 : 0);
