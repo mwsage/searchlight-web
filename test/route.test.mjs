@@ -181,4 +181,15 @@ for (let i = 0; i < directives.length; i++) {
 assert('the content signal permits search and refuses training',
        /^Content-Signal:.*search=yes/m.test(robots) && /ai-train=no/.test(robots));
 
+// PRIVACY POLICY: two claims a reader can falsify.
+// A legal document must not promise a mechanism the app does not have, and it
+// must not need the product's vocabulary to be understood — App Review opens
+// this URL in a browser, having never used the app.
+assert('no promise of in-app change notices — there is no such surface',
+       !/surfaced in the app/i.test(privacy) && !/notify you in the app/i.test(privacy));
+assert('the policy says how a reader detects a change instead',
+       /date at the top\s*\n?\s*is updated/i.test(privacy) || /Check the date above/i.test(privacy));
+assert('no "throws up a Searchlight" jargon anywhere on the page',
+       !/throws? up a Searchlight/i.test(privacy));
+
 process.exit(failed ? 1 : 0);
