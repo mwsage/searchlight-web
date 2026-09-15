@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  Searchlight's Terms of Use. This page exists because App Review rejected the app under
+  GUIDELINE 1.2 (User-Generated Content), which requires four things of any app where
+  users can post: a way to filter objectionable content, a way to flag it, a way to block
+  an abusive user, published contact information — and a EULA the user agrees to that
+  states there is no tolerance for objectionable content or abusive users.
+
+  The first four ship in the app. This page is the fifth, and the in-app checkbox on the
+  sign-up and sign-in screens is what turns it into an agreement rather than a document
+  nobody has seen.
+
+  EVERY CLAIM HERE IS WRITTEN FROM THE CODE, not from a template. The six report reasons
+  are app/types/moderation.ts REPORT_REASON_LABELS. Blocking is promptBlock plus
+  useBlockedUids plus Settings > Blocked accounts. The account deletion route is
+  settings.tsx. A terms page that describes controls the app does not have is worse than
+  none, because a reviewer will open the app and check.
+
+  THE 24-HOUR COMMITMENT IN "What we do about a report" IS A PROMISE A HUMAN HAS TO KEEP.
+  Guideline 1.2 asks for it explicitly and it is quoted back at us if we miss it. Nothing
+  currently reads the reports collection — that is filed as backlog row 5177c214 — so
+  until it is built, the reports inbox is checked by hand.
+
+  Its own file, not a view inside index.html: exact-match assets win over the SPA
+  fallback, so /terms needs no routing code and stays independently linkable for the
+  App Store submission and for the in-app link.
+-->
+<title>Terms of Use — Searchlight</title>
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#000000">
+<style>
+  :root {
+    --ground: #000000; --card: #111111; --text: #F2F2F2; --muted: #9DA3AD;
+    --gold: #F2C879; --border-subtle: rgba(255,255,255,0.12); --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ground); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.55;
+    padding: 0 20px calc(56px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  header { padding: 56px 0 32px; border-bottom: 1px solid var(--border-subtle); }
+  .brand {
+    font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin: 0 0 20px;
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  h1 { font-size: clamp(28px, 6vw, 36px); line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 10px; font-weight: 680; }
+  .updated { font-size: 14px; color: var(--muted); margin: 0; }
+  h2 { font-size: 20px; margin: 40px 0 12px; font-weight: 650; letter-spacing: -0.01em; }
+  h3 { font-size: 16px; margin: 24px 0 8px; font-weight: 640; }
+  p, li { font-size: 16px; color: var(--muted); }
+  p { margin: 0 0 14px; }
+  ul { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  strong { color: var(--text); font-weight: 620; }
+  a { color: var(--gold); }
+  .note {
+    background: var(--card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius); padding: 16px 18px; margin: 0 0 14px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+  th { color: var(--text); font-weight: 620; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+  td { color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-subtle);
+           display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; }
+  footer a { color: var(--muted); text-decoration: none; padding: 8px 4px; }
+  footer a:hover, footer a:focus-visible { color: var(--text); text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand"><a href="/">Searchlight</a></p>
+    <h1>Terms of Use</h1>
+    <p class="updated">Last updated 15 September 2026</p>
+  </header>
+
+  <p>Searchlight is an app for letting a group of people you already know that something
+    is happening. These terms are the agreement between you and Searchlight for using it.
+    You accept them when you tick the box on the sign-up or sign-in screen. If you do not
+    accept them, do not use the app.</p>
+
+  <p>They are written to be read. Where a term has a consequence for you, it says what the
+    consequence is.</p>
+
+  <h2>No tolerance for objectionable content or abusive users</h2>
+
+  <div class="note">
+    <p><strong>There is no tolerance for objectionable content or for abusive behaviour
+      on Searchlight.</strong> Content that breaks the rule below is removed, and the
+      account that posted it is suspended or terminated. That decision is ours and it does
+      not require a warning first.</p>
+  </div>
+
+  <p>You agree not to post, send, or share anything that:</p>
+  <ul>
+    <li>harasses, bullies, threatens, stalks, or intimidates another person;</li>
+    <li>attacks or demeans a person or group on the basis of race, ethnicity, national
+      origin, religion, caste, sexual orientation, sex, gender, gender identity,
+      disability, or serious disease;</li>
+    <li>is sexually explicit, or sexualises a minor in any way;</li>
+    <li>depicts, encourages, or glorifies violence, self-harm, or suicide;</li>
+    <li>promotes, organises, or facilitates illegal activity, including the sale of drugs,
+      weapons, or stolen goods;</li>
+    <li>is spam, a scam, a phishing attempt, or bulk unsolicited messaging;</li>
+    <li>impersonates another person, or misrepresents who you are in order to be let into
+      a group;</li>
+    <li>infringes someone else's copyright, trademark, or other rights;</li>
+    <li>shares another person's private information — their address, phone number,
+      workplace, or location — without their consent.</li>
+  </ul>
+
+  <p>You also agree not to use Searchlight to abuse the service itself: no automated
+    scraping or bulk collection of other people's information, no attempt to bypass the
+    access rules that decide who can see a group, and no reverse engineering of the app.</p>
+
+  <h2>Reporting content and blocking people</h2>
+
+  <p>Every place someone else's content appears, you can report it, and you can block the
+    person who posted it. Both are in the app, not behind an email.</p>
+
+  <h3>Reporting</h3>
+  <p>Press and hold a message in an event to report that message. Open a person's profile
+    to report the person. You pick a reason — <strong>Spam</strong>,
+    <strong>Harassment</strong>, <strong>Hate</strong>, <strong>Sexual content</strong>,
+    <strong>Violence</strong>, or <strong>Other</strong> — and can add a note. The report
+    goes to us with the message or profile attached, so we can see what you saw.</p>
+
+  <h3>Blocking</h3>
+  <p>Open a person's profile and block them. A block is immediate and it works in both
+    directions: their messages stop appearing in your event threads, they disappear from
+    the member lists you see, and neither of you can reach the other. Your blocked list is
+    in <strong>Settings → Blocked accounts</strong>, where you can unblock someone if you
+    change your mind.</p>
+
+  <h3>What we do about a report</h3>
+  <p><strong>We review reports and act on them within 24 hours.</strong> Acting means
+    removing the content, ejecting the person who posted it, or both. If a report is about
+    something that puts someone in immediate danger, we involve law enforcement.</p>
+  <p>If you would rather write to a person than use the in-app report, email
+    <a href="mailto:support@searchlight.social">support@searchlight.social</a> and say what
+    happened. Reports about a child under 13, or about anything sexual involving a minor,
+    are looked at first.</p>
+
+  <h2>Who can use Searchlight</h2>
+  <p>You must be 13 or older. Searchlight is not directed at children under 13 and we
+    remove accounts we learn belong to one. The app is currently available in the United
+    States only.</p>
+
+  <h2>Your account</h2>
+  <p>You are responsible for your account and for what is done with it. Keep your sign-in
+    details to yourself. If you think someone else has got into your account, email us.</p>
+  <p>You can delete your account at any time in <strong>Settings → Delete Account</strong>.
+    It removes your account and the personal data attached to it, and it cannot be undone.</p>
+
+  <h2>Content you post</h2>
+  <p>What you post stays yours. You are the one responsible for it, and you confirm you
+    have the right to post it.</p>
+  <p>So that the app can work, you grant Searchlight a non-exclusive, worldwide,
+    royalty-free licence to host, store, and display your content to the people you posted
+    it to — the members of the group or event you posted in, and nobody else. The licence
+    exists to run the service. It does not let us sell your content, show it to people
+    outside your groups, or use it in advertising, and it ends when the content is
+    deleted.</p>
+  <p>Events on Searchlight are temporary by design: when a searchlight is turned off, the
+    event and its chat stop appearing. Copies may remain in backups for a short period
+    before they age out.</p>
+
+  <h2>Suspension and termination</h2>
+  <p>We may remove content and suspend or terminate an account that breaks these terms.
+    For anything in the no-tolerance list above, we act without a warning. You can stop
+    using Searchlight at any time by deleting your account.</p>
+
+  <h2>The app as it is</h2>
+  <p>Searchlight is provided as it is. We do not promise it will be uninterrupted or
+    error-free, and we do not control what other people post — that is what the reporting
+    and blocking controls are for. To the fullest extent the law allows, Searchlight
+    disclaims the implied warranties of merchantability, fitness for a particular purpose,
+    and non-infringement.</p>
+  <p>To the fullest extent the law allows, Searchlight is not liable for indirect,
+    incidental, or consequential damages arising out of your use of the app. Some
+    jurisdictions do not allow these limits, in which case they apply to you only as far
+    as that jurisdiction permits.</p>
+
+  <h2>If you use Searchlight on an Apple device</h2>
+  <p>These terms are between you and Searchlight, not Apple. Apple is not responsible for
+    the app or its content.</p>
+  <ul>
+    <li>Apple has no obligation to provide maintenance or support for the app.</li>
+    <li>If the app fails to conform to any applicable warranty, you may notify Apple and
+      Apple will refund the purchase price, if any. Apple has no other warranty obligation
+      for the app.</li>
+    <li>Apple is not responsible for addressing any claim by you or a third party relating
+      to the app, including product liability claims, any claim that the app fails to
+      conform to a legal requirement, and claims arising under consumer protection or
+      similar legislation.</li>
+    <li>If a third party claims the app infringes their intellectual property rights,
+      Searchlight, not Apple, is responsible for investigating and resolving that claim.</li>
+    <li>You confirm you are not located in a country subject to a US Government embargo or
+      designated as a terrorist-supporting country, and that you are not on any US
+      Government list of prohibited or restricted parties.</li>
+    <li>Apple and its subsidiaries are third-party beneficiaries of these terms, and Apple
+      has the right to enforce them against you.</li>
+  </ul>
+
+  <h2>Governing law</h2>
+  <p>Searchlight is offered in the United States, and these terms are governed by United
+    States law and by the law of the state in which Searchlight is established, without
+    regard to conflict-of-law rules. Nothing here takes away a right your own state's
+    consumer law gives you.</p>
+
+  <h2>Changes to these terms</h2>
+  <p>If these terms change, this page changes and the date at the top is updated. If a
+    change is significant, you will be asked to agree again the next time you sign in.</p>
+
+  <h2>Contact</h2>
+  <p><a href="mailto:support@searchlight.social">support@searchlight.social</a></p>
+
+  <footer>
+    <a href="/">Home</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/support">Support</a>
+  </footer>
+</main>
+</body>
+</html>

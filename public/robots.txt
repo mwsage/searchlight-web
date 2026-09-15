@@ -15,8 +15,10 @@
 # never index an invite. This is the other half of that: keep compliant crawlers
 # off the paths entirely rather than trusting them to render a meta tag.
 #
-# The home page, privacy policy and support page are public and meant to be
-# found — /privacy and /support are the two URLs App Review opens in a browser.
+# The home page, privacy policy, terms of use and support page are public and
+# meant to be found — /privacy, /terms and /support are the URLs App Review opens
+# in a browser. /terms is also the document the in-app sign-up checkbox links to,
+# so a user must be able to reach it without the app.
 
 # AI CRAWLERS. Cloudflare's managed robots.txt used to add this group and was
 # turned off on 2026-09-05 because its `User-agent: * / Allow: /` sat above the
@@ -64,5 +66,6 @@ Disallow: /i/
 Disallow: /e/
 Allow: /$
 Allow: /privacy
+Allow: /terms
 Allow: /support
 Disallow: /

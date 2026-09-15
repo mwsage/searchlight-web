@@ -13,6 +13,7 @@ const url = (p) => new URL(p, import.meta.url);
 const html = readFileSync(url('../public/index.html'), 'utf8');
 const privacy = readFileSync(url('../public/privacy/index.html'), 'utf8');
 const support = readFileSync(url('../public/support/index.html'), 'utf8');
+const terms = readFileSync(url('../public/terms/index.html'), 'utf8');
 const aasa = JSON.parse(readFileSync(url('../public/.well-known/apple-app-site-association'), 'utf8'));
 const robots = readFileSync(url('../public/robots.txt'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
@@ -81,6 +82,7 @@ assert('INVITE path stays noindex', inviteR.robots === 'noindex, nofollow');
 assert('invalid-invite path stays noindex', run('/i/').robots === 'noindex, nofollow');
 assert('privacy page is indexable', /content="index, follow"/.test(privacy));
 assert('support page is indexable', /content="index, follow"/.test(support));
+assert('terms page is indexable', /content="index, follow"/.test(terms));
 
 console.log('\n--- welcome page behaviour ---');
 assert('home never fetches', homeR.fetched === null);
@@ -105,11 +107,13 @@ for (const phrase of ['for men', 'the guy', 'guys', ' his ', ' him ']) {
   assert(`no gendered phrasing: ${JSON.stringify(phrase)}`,
          !html.toLowerCase().includes(phrase));
 }
-assert('support address appears on both standalone pages',
+assert('support address appears on every standalone page',
        privacy.includes('support@searchlight.social') &&
-       support.includes('support@searchlight.social'));
-assert('welcome page links to privacy and support',
-       html.includes('href="/privacy"') && html.includes('href="/support"'));
+       support.includes('support@searchlight.social') &&
+       terms.includes('support@searchlight.social'));
+assert('welcome page links to privacy, terms and support',
+       html.includes('href="/privacy"') && html.includes('href="/terms"') &&
+       html.includes('href="/support"'));
 
 // Universal links. This file is the ONLY thing that decides whether a tapped
 // searchlight.social/i/... opens the app or the website, and it fails silently:
@@ -153,6 +157,7 @@ assert('everything else is disallowed by default', has('Disallow: /'));
 // The three pages that ARE public — /privacy and /support are App Store fields.
 assert('the home page is allowed', has('Allow: /$'));
 assert('the privacy page is allowed', has('Allow: /privacy'));
+assert('the terms page is allowed', has('Allow: /terms'));
 assert('the support page is allowed', has('Allow: /support'));
 // The allow-list must not accidentally re-open the unlisted paths.
 assert('no Allow rule re-opens an unlisted link',
@@ -191,5 +196,38 @@ assert('the policy says how a reader detects a change instead',
        /date at the top\s*\n?\s*is updated/i.test(privacy) || /Check the date above/i.test(privacy));
 assert('no "throws up a Searchlight" jargon anywhere on the page',
        !/throws? up a Searchlight/i.test(privacy));
+
+// TERMS OF USE — the Guideline 1.2 clauses, pinned.
+// App Review rejected Searchlight because there was no EULA the user agrees to. This
+// page is that EULA, and the four things below are what the guideline names by hand:
+// the no-tolerance statement, a stated way to flag content, a stated way to block a
+// user, and a stated timeframe for acting on a report. Losing any one of them in an
+// edit would cost another review cycle, and nothing else in this repo would notice.
+console.log('\n--- terms of use (Guideline 1.2) ---');
+assert('states no tolerance for objectionable content',
+       /no tolerance for objectionable content/i.test(terms));
+assert('states no tolerance for abusive behaviour',
+       /no tolerance for objectionable content or for abusive behaviour/i.test(terms));
+assert('tells the user how to flag content',
+       /report that message/i.test(terms) && /report the person/i.test(terms));
+assert('tells the user how to block someone',
+       /block them/i.test(terms) && /Blocked accounts/i.test(terms));
+assert('commits to a timeframe for acting on a report',
+       /within 24 hours/i.test(terms));
+assert('names ejecting the offending user, not only removing the post',
+       /ejecting the person who posted it/i.test(terms));
+assert('carries the Apple licensed-application terms',
+       /third-party beneficiaries of these terms/i.test(terms) &&
+       /Apple is not responsible for\s+the app/i.test(terms));
+// The in-app checkbox stamps `TERMS_VERSION` (app/constants/legal.ts) onto the account.
+// It is an ISO date so it can be read back against this line; if the two drift, the
+// stored version no longer identifies a document anyone can fetch.
+assert('carries a "Last updated" date the app version can be checked against',
+       /class="updated">Last updated \d{1,2} \w+ \d{4}</.test(terms));
+// The page describes the app's own controls. A claim about a control that does not
+// exist is the failure mode that costs a SECOND rejection, since a reviewer checks.
+assert('does not promise moderation the app does not have',
+       !/automated filter/i.test(terms) && !/community moderator/i.test(terms) &&
+       !/reputation system/i.test(terms));
 
 process.exit(failed ? 1 : 0);
