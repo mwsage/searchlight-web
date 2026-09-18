@@ -51,22 +51,21 @@ behind a working-looking page.
 ### Two switches on the home page
 
 - `INSTALL_URL` — shared with the invite view, see below.
-- `BETA_LINK_READY` — whether `INSTALL_URL` is a real destination yet. Bare
-  `testflight.apple.com` is Apple's generic marketing page: it installs nothing and
-  explains nothing, so "Join the beta" would strand whoever tapped it. While this is
-  `false` the home page says *"The beta opens shortly."* instead. Paste the public link
-  and flip this to `true` — that is the entire change.
+- `INSTALL_READY` — whether `INSTALL_URL` is a real destination. It kept the home page
+  honest through the beta, when a bare `testflight.apple.com` would have stranded
+  whoever tapped it. **`true` since launch.** Kept rather than deleted: it is what makes
+  the home CTA safe to re-point at anything.
 
-## The one thing that changes between beta and launch
+## The install destination
 
 `public/index.html` → `INSTALL_URL`.
 
-- **Beta:** the TestFlight **public link**. Get it in App Store Connect → your app →
-  TestFlight → an **External** test group → enable the public link. It only exists
-  *after* a build has passed **Beta App Review** (first build only, ~a day or two).
-- **Launch:** the App Store URL.
+**LAUNCHED 2026-09-18.** Searchlight Social is live:
+`https://apps.apple.com/us/app/searchlight-social/id6762578884`. The numeric id is the
+App Store's, not the bundle id — `com.searchlight.app` does not appear in any store URL.
 
-Editing that one line re-points every invite already in the wild. No app release.
+Editing that one line re-points every invite already in the wild. No app release. The
+test pins the destination, so changing it without changing `test/route.test.mjs` fails.
 
 ## Testing
 

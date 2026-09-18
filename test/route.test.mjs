@@ -19,7 +19,8 @@ const robots = readFileSync(url('../public/robots.txt'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
-const IDS = [...SECTIONS, 'joinBeta', 'betaSoon', 'joinBetaMid', 'betaSoonMid', 'joinBetaFoot', 'betaSoonFoot',
+const APP_STORE_URL = 'https://apps.apple.com/us/app/searchlight-social/id6762578884';
+const IDS = [...SECTIONS, 'getApp', 'getAppSoon', 'getAppMid', 'getAppSoonMid', 'getAppFoot', 'getAppSoonFoot',
              'brandLine', 'install', 'open', 'installFallback',
              'eventInstall', 'eventOpen',
              'inviter', 'groupName', 'groupDesc', 'visibility'];
@@ -47,8 +48,8 @@ function run(pathname) {
   return { visible, robots: robots.content, footHidden: foot.hidden, fetched,
            bodyClass: body.className,
            eventOpen: els.eventOpen.href,
-           joins: [els.joinBeta, els.joinBetaMid, els.joinBetaFoot].map((e) => (e.hidden ? null : e.href)),
-           soons: [els.betaSoon, els.betaSoonMid, els.betaSoonFoot].map((e) => !e.hidden) };
+           joins: [els.getApp, els.getAppMid, els.getAppFoot].map((e) => (e.hidden ? null : e.href)),
+           soons: [els.getAppSoon, els.getAppSoonMid, els.getAppSoonFoot].map((e) => !e.hidden) };
 }
 
 let failed = 0;
@@ -94,12 +95,23 @@ assert('event open uses the app scheme',
        eventR.eventOpen === 'searchlight:///event/ev_abc123');
 assert('home swaps body to the scrolling layout', homeR.bodyClass === 'is-home');
 assert('invite path leaves the centred layout alone', inviteR.bodyClass === '');
-assert('BOTH beta CTAs resolve together — never one live and one dead',
-       homeR.joins[0] === homeR.joins[1] && homeR.soons[0] === homeR.soons[1]);
-assert('beta buttons hidden while the link is unset',
-       homeR.joins.every((j) => j === null) && homeR.soons.every(Boolean));
+assert('ALL THREE install CTAs resolve together — never one live and one dead',
+       homeR.joins[0] === homeR.joins[1] && homeR.joins[1] === homeR.joins[2] &&
+       homeR.soons[0] === homeR.soons[1] && homeR.soons[1] === homeR.soons[2]);
+// LAUNCHED 2026-09-18. This pair used to assert the opposite — buttons hidden, stand-in
+// shown — which was right while INSTALL_URL was Apple's generic TestFlight page. The
+// app is live, so the contract inverted and the test inverts with it.
+assert('every install button is live and points at the App Store listing',
+       homeR.joins.every((j) => j === APP_STORE_URL));
+assert('the "not yet" stand-in never renders once the link is real',
+       homeR.soons.every((shown) => shown === false));
+assert('the install link is the real listing, with the numeric app id',
+       /^https:\/\/apps\.apple\.com\/[a-z]{2}\/app\/[a-z0-9-]+\/id\d+$/.test(APP_STORE_URL));
+assert('no TestFlight link survives anywhere on the page',
+       !/testflight\.apple\.com/i.test(html));
 
 console.log('\n--- copy ---');
+assert('no "Join the beta" copy survives the launch', !/join the beta/i.test(html));
 assert('no "waitlist" anywhere — the beta is a public link', !/waitlist/i.test(html));
 // The founder de-gendered this copy deliberately; a regression here is a values
 // regression rather than a typo, so it is pinned instead of left to review.

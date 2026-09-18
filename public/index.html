@@ -200,8 +200,8 @@
      40px margin — so it needs its own bottom room to match the footer CTA's spacing. */
   .closing-mid { padding-bottom: 48px; }
 
-  /* Honest stand-in for the button while the beta link does not exist yet — see
-     BETA_LINK_READY in the script. */
+  /* Honest stand-in for the button when INSTALL_URL has no real destination — see
+     INSTALL_READY in the script. */
   .soon {
     text-align: center; padding: 14px 16px; border-radius: var(--radius);
     border: 1px dashed var(--border-subtle); color: var(--muted); font-size: 15px; margin: 0;
@@ -253,8 +253,8 @@
         if they're in.</p>
       <p class="kicker">The group stays. The plan comes and goes.</p>
       <div class="actions">
-        <a class="btn primary" id="joinBeta" href="#" hidden>Join the beta</a>
-        <p class="soon" id="betaSoon" hidden>The beta opens shortly.</p>
+        <a class="btn primary" id="getApp" href="#" hidden>Download on the App Store</a>
+        <p class="soon" id="getAppSoon" hidden>The App Store listing is on its way.</p>
       </div>
     </div>
 
@@ -343,8 +343,8 @@
         <li>Connect with your group.</li>
       </ul>
       <div class="actions">
-        <a class="btn primary" id="joinBetaMid" href="#" hidden>Join the beta</a>
-        <p class="soon" id="betaSoonMid" hidden>The beta opens shortly.</p>
+        <a class="btn primary" id="getAppMid" href="#" hidden>Download on the App Store</a>
+        <p class="soon" id="getAppSoonMid" hidden>The App Store listing is on its way.</p>
       </div>
     </div>
 
@@ -451,8 +451,8 @@
         <li>See your friends.</li>
       </ul>
       <div class="actions">
-        <a class="btn primary" id="joinBetaFoot" href="#" hidden>Join the beta</a>
-        <p class="soon" id="betaSoonFoot" hidden>The beta opens shortly.</p>
+        <a class="btn primary" id="getAppFoot" href="#" hidden>Download on the App Store</a>
+        <p class="soon" id="getAppSoonFoot" hidden>The App Store listing is on its way.</p>
       </div>
     </div>
 
@@ -516,22 +516,19 @@
   'use strict';
 
   // ---------------------------------------------------------------------------
-  // THE ONE CONSTANT THAT CHANGES BETWEEN BETA AND LAUNCH.
-  // Beta: the TestFlight PUBLIC link (App Store Connect -> external test group ->
-  // enable public link; available only AFTER a build passes Beta App Review).
-  // Launch: the App Store URL. Editing this line re-points every invite in the wild
-  // without an app release.
+  // THE ONE CONSTANT THAT POINTS EVERY INSTALL BUTTON AT A DESTINATION.
+  // Was the TestFlight public link through the beta. LAUNCHED 2026-09-18: Searchlight
+  // Social is live on the App Store, so this is the store listing. Editing this line
+  // re-points every invite already in the wild without an app release.
   // ---------------------------------------------------------------------------
-  var INSTALL_URL = 'https://testflight.apple.com/';   // TODO: paste the public link
+  var INSTALL_URL = 'https://apps.apple.com/us/app/searchlight-social/id6762578884';
 
-  // Whether INSTALL_URL is a real destination yet. Bare `testflight.apple.com` is
-  // Apple's generic marketing page: it does not install anything and it does not
-  // explain itself, so a visitor who taps "Join the beta" today lands somewhere that
-  // looks like a mistake. Until the public link exists, the welcome page says so
-  // plainly instead. Pasting the link above and flipping this to true is the whole
-  // change — and the invite view is unaffected either way, since its buttons only ever
-  // appear to someone who was actually invited.
-  var BETA_LINK_READY = false;
+  // Whether INSTALL_URL is a real destination. It kept the home page honest through
+  // the beta, when the constant above was Apple's generic TestFlight marketing page —
+  // a button that installs nothing is worse than a sentence saying "not yet". The App
+  // Store listing is real, so this is true and the stand-in never renders. Kept rather
+  // than deleted: it is the switch that makes the home CTA safe to point anywhere.
+  var INSTALL_READY = true;
 
   // Firebase project id. NO API KEY — and that is not an oversight.
   //
@@ -575,8 +572,8 @@
   function home() {
     // Both calls-to-action are the same decision, so they resolve together — a page
     // where the top button works and the bottom one does not is worse than neither.
-    [['joinBeta', 'betaSoon'], ['joinBetaMid', 'betaSoonMid'], ['joinBetaFoot', 'betaSoonFoot']].forEach(function (pair) {
-      if (BETA_LINK_READY) {
+    [['getApp', 'getAppSoon'], ['getAppMid', 'getAppSoonMid'], ['getAppFoot', 'getAppSoonFoot']].forEach(function (pair) {
+      if (INSTALL_READY) {
         var join = document.getElementById(pair[0]);
         join.href = INSTALL_URL;
         join.hidden = false;
