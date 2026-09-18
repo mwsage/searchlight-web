@@ -110,6 +110,25 @@ assert('the install link is the real listing, with the numeric app id',
 assert('no TestFlight link survives anywhere on the page',
        !/testflight\.apple\.com/i.test(html));
 
+console.log('\n--- markup ---');
+// 88 copy assertions passed over `<p><hr>…</p></h4></p>` and `<li><h4>…</h4><li><br>`.
+// Every one of them reads TEXT, so none could see that the tags around it were invalid —
+// and a browser silently reflows broken nesting into something that renders wrong rather
+// than failing. These check the shape instead of the words.
+for (const [tag, n] of [['p', 'p'], ['li', 'li'], ['h4', 'h4'], ['h3', 'h3'], ['ul', 'ul']]) {
+  const open = (html.match(new RegExp(`<${tag}[ >]`, 'g')) || []).length;
+  const close = (html.match(new RegExp(`</${n}>`, 'g')) || []).length;
+  assert(`<${tag}> tags balance (${open} open / ${close} close)`, open === close);
+}
+// A <p> cannot contain flow content. The browser closes the paragraph at the block tag,
+// so the author's intended grouping silently disappears.
+for (const block of ['hr', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'div', 'p']) {
+  assert(`no <${block}> nested directly inside a <p>`,
+         !new RegExp(`<p[^>]*>\\s*<${block}[ >/]`).test(html));
+}
+assert('no heading nested inside a list item',
+       !/<li[^>]*>\s*<h[1-6][ >]/.test(html));
+
 console.log('\n--- copy ---');
 assert('no "Join the beta" copy survives the launch', !/join the beta/i.test(html));
 // COLD START. "How it works" shipped as create -> signal -> notified, which silently

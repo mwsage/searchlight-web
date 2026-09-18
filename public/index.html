@@ -186,6 +186,13 @@
   }
   .steps h3 { font-size: 18px; margin: 3px 0 8px; font-weight: 640; }
   .steps p { margin: 0 0 8px; }
+  /* The one instruction in a step that the reader has to actually DO. Sits between h3
+     and body: same size as body so it does not compete with the step title, heavier and
+     in full-contrast text so it is the line the eye lands on. */
+  .steps h4 { font-size: 16px; line-height: 1.55; margin: 0 0 10px; font-weight: 650;
+    color: var(--text); }
+  /* Separates a step's own beats from the instruction above them. */
+  .steps .beats { margin-top: 12px; }
 
   .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 12px; }
   .ex { background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 16px; }
@@ -306,7 +313,7 @@
           <span class="n">1</span>
           <div>
             <h3>Create your group</h3>
-            <p>Start a group around the an interest, geography, or activity.</p>
+            <p>Start a group around an interest, a geography, or an activity.</p>
             <ul class="beats">
               <li>Your cigar crew.</li>
               <li>Your golf group.</li>
@@ -319,7 +326,7 @@
           <span class="n">2</span>
           <div>
             <h3>Bring your people</h3>
-            <p>Copy the group's invite link and text it to them.</p>
+            <h4>Copy the group's invite link and text it to them.</h4>
             <p>They tap it, install the app, and land straight in your group &mdash; the
               link remembers which one.</p>
             <ul class="beats">
