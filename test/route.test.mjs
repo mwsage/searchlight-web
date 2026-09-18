@@ -112,6 +112,22 @@ assert('no TestFlight link survives anywhere on the page',
 
 console.log('\n--- copy ---');
 assert('no "Join the beta" copy survives the launch', !/join the beta/i.test(html));
+// COLD START. "How it works" shipped as create -> signal -> notified, which silently
+// assumed the group already had people in it. At launch there are no users at all, so
+// the step that was missing is the only one an early adopter actually has to do.
+const steps = (html.match(/<h2>How it works<\/h2>[\s\S]*?<\/ol>/) || [''])[0];
+const stepNums = [...steps.matchAll(/<span class="n">(\d)<\/span>/g)].map((m) => m[1]);
+const stepHeads = [...steps.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
+assert('How it works is numbered 1..4 with no gap', stepNums.join('') === '1234');
+assert('the invite step exists and sits before the signal step',
+       stepHeads[1] === 'Bring your people' && stepHeads[2] === 'Throw up a Searchlight');
+assert('the invite step tells them to text a link', /text it to them/i.test(steps));
+assert('the page names the cold start rather than hiding it',
+       /Nobody you know is on Searchlight yet/i.test(html));
+// Whitespace-tolerant: the source wraps at 90 cols, so a copy assertion that pins
+// single spaces breaks on a reflow rather than on a copy change.
+assert('the cold-start block says there is no feed to browse',
+       /no\s+feed,\s+no\s+discovery/i.test(html));
 assert('no "waitlist" anywhere — the beta is a public link', !/waitlist/i.test(html));
 // The founder de-gendered this copy deliberately; a regression here is a values
 // regression rather than a typo, so it is pinned instead of left to review.
