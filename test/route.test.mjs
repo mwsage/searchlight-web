@@ -166,12 +166,23 @@ assert('How it works is numbered 1..4 with no gap', stepNums.join('') === '1234'
 assert('the invite step exists and sits before the signal step',
        stepHeads[1] === 'Bring your people' && stepHeads[2] === 'Throw up a Searchlight');
 assert('the invite step tells them to text a link', /text it to them/i.test(steps));
-assert('the page names the cold start rather than hiding it',
-       /Nobody you know is on Searchlight yet/i.test(html));
-// Whitespace-tolerant: the source wraps at 90 cols, so a copy assertion that pins
-// single spaces breaks on a reflow rather than on a copy change.
-assert('the cold-start block says there is no feed to browse',
-       /no\s+feed,\s+no\s+discovery/i.test(html));
+// TWO ASSERTIONS RETIRED HERE 2026-09-19, and the reason is recorded so nobody
+// restores them from the git history as a "fix".
+//
+// They pinned a standalone block — "Nobody you know is on Searchlight yet" / "no feed,
+// no discovery" — added in ad3bfb1 and deleted the next commit, 1ffb11e, in the
+// founder's copy pass. The COPY DECISION STANDS: the shorter page is the one we want.
+//
+// Nothing was lost, which is why this is a retirement and not a regression. The block
+// existed to say that an early adopter has nobody to find and has to bring their own
+// people, and step 2 now says that INSIDE the step it applies to, which is the better
+// place for it. The line below pins that, so the meaning is still guarded after its
+// original wording is gone.
+//
+// This was red on main for a day, unseen, because this repo has no CI. Nothing runs
+// this file except a person remembering to.
+assert('the invite step still says there is nothing to search for — no discovery to rely on',
+       /Nothing to search for/i.test(steps));
 assert('no "waitlist" anywhere — the beta is a public link', !/waitlist/i.test(html));
 // The founder de-gendered this copy deliberately; a regression here is a values
 // regression rather than a typo, so it is pinned instead of left to review.
