@@ -118,6 +118,8 @@
   .eyebrow { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
   h1 { font-size: 24px; line-height: 1.25; margin: 0 0 10px; font-weight: 650; }
   .desc { font-size: 15px; color: var(--muted); margin: 0 0 16px; }
+  /* The one line that rescues an install with no invite behind it. See INSTALL_HINT. */
+  .after-install { font-size: 13px; color: var(--muted); margin: 12px 0 0; text-align: center; }
   .pill {
     display: inline-block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
     border: 1px solid var(--pill-border); color: var(--muted);
@@ -514,6 +516,7 @@
       <a class="btn primary" id="install" href="#">Get Searchlight</a>
       <a class="btn secondary" id="open" href="#">I already have the app</a>
     </div>
+    <p class="after-install" id="afterInstall" hidden></p>
   </section>
 
   <!--
@@ -550,6 +553,13 @@
   // Store listing is real, so this is true and the stand-in never renders. Kept rather
   // than deleted: it is the switch that makes the home CTA safe to point anywhere.
   var INSTALL_READY = true;
+
+  // Shown after the install button is tapped on an invite. The invite is copied to the
+  // clipboard at the same moment and the app offers it on first launch, but that offer
+  // can be declined or refused, and Android has no silent clipboard check at all — so
+  // this sentence is the floor under every path. Tearing down with the clipboard work
+  // when a deferred-deep-link SDK ships.
+  var INSTALL_HINT = 'After installing, come back and tap this link again to join the group.';
 
   // Firebase project id. NO API KEY — and that is not an oversight.
   //
@@ -680,10 +690,44 @@
         v.hidden = false;
       }
 
-      document.getElementById('install').href = INSTALL_URL;
+      var install = document.getElementById('install');
+      install.href = INSTALL_URL;
       // Both buttons always render: a web page cannot reliably detect whether the app
       // is installed, and guessing wrong strands the visitor with the wrong one.
       document.getElementById('open').href = APP_SCHEME + encodeURIComponent(inviteId);
+
+      // CARRY THE INVITE THROUGH THE APP STORE.
+      //
+      // A universal link only opens the app when the app was ALREADY installed when it
+      // was tapped, so the tap that sends someone to the store carries nothing, and the
+      // app they open a minute later starts on a login screen with no idea why they are
+      // there. Nothing on iOS passes a URL through an install, and Firebase Dynamic
+      // Links — the standard answer for years — was shut down in August 2025.
+      //
+      // So: copy the invite URL in the same gesture that opens the store. The app checks
+      // the clipboard once on first launch and OFFERS to open it (app/hooks/
+      // useDeferredInvite.ts). It never reads without asking.
+      //
+      // The write is best-effort by design — Safari can refuse it, and the visitor still
+      // gets the store either way. The line below is what makes a refusal survivable,
+      // which is why it appears on the click rather than on load: before the click there
+      // is nothing to come back to, and on Android, where the app has no silent way to
+      // check the clipboard, this line IS the mechanism.
+      //
+      // ⚠️ STOPGAP. When Branch.io or an equivalent deferred-deep-link SDK ships, tear
+      // this down with the app-side half: the clipboard write, INSTALL_HINT, the
+      // #afterInstall element and .after-install. Two systems racing to open the same
+      // invite is worse than either.
+      install.addEventListener('click', function () {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(window.location.href);
+          }
+        } catch (e) { /* best effort — never block the store */ }
+        var hint = document.getElementById('afterInstall');
+        hint.textContent = INSTALL_HINT;
+        hint.hidden = false;
+      });
 
       show('invite');
     })

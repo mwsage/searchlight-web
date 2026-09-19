@@ -21,13 +21,25 @@ const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
 const APP_STORE_URL = 'https://apps.apple.com/us/app/searchlight-social/id6762578884';
 const IDS = [...SECTIONS, 'getApp', 'getAppSoon', 'getAppMid', 'getAppSoonMid', 'getAppFoot', 'getAppSoonFoot',
-             'brandLine', 'install', 'open', 'installFallback',
+             'brandLine', 'install', 'open', 'installFallback', 'afterInstall',
              'eventInstall', 'eventOpen',
              'inviter', 'groupName', 'groupDesc', 'visibility'];
 
-function run(pathname) {
+/**
+ * `invite` — a groupInvitePreviews document for the fetch to resolve with. Omitted, the
+ * fetch stub never calls back, which is what every pre-existing case relies on: they
+ * assert the LOADING state and must not run the resolution body.
+ */
+function run(pathname, invite) {
   const els = {};
-  for (const id of IDS) els[id] = { id, hidden: id !== 'loading', href: '', textContent: '' };
+  for (const id of IDS) {
+    els[id] = {
+      id, hidden: id !== 'loading', href: '', textContent: '',
+      listeners: {},
+      addEventListener(type, fn) { (this.listeners[type] ??= []).push(fn); },
+      click() { for (const fn of this.listeners.click ?? []) fn(); },
+    };
+  }
   const robots = { content: 'noindex, nofollow', setAttribute(k, v) { this[k] = v; } };
   const foot = { hidden: false };
   const body = { className: '' };
@@ -38,14 +50,27 @@ function run(pathname) {
     querySelector: (sel) => (sel === '.foot' ? foot
                            : sel === 'meta[name="robots"]' ? robots : null),
   };
-  const window = { location: { pathname } };
+  const window = { location: { pathname, href: `https://searchlight.social${pathname}` } };
   let fetched = null;
-  const fetch = (u) => { fetched = u; return { then: () => ({ then: () => ({ catch: () => {} }) }) }; };
+  const copied = [];
+  const navigator = { clipboard: { writeText: (t) => { copied.push(t); } } };
 
-  new Function('window', 'document', 'fetch', script)(window, document, fetch);
+  // Resolves SYNCHRONOUSLY through a thenable, so the assertions below need no await
+  // and the pre-existing cases keep the never-resolving stub they were written against.
+  const resolved = (value) => ({
+    then: (onOk) => { const next = onOk ? onOk(value) : value; return resolved(next); },
+    catch: () => resolved(value),
+  });
+  const fetch = (u) => {
+    fetched = u;
+    if (!invite) return { then: () => ({ then: () => ({ catch: () => {} }) }) };
+    return resolved({ ok: true, json: () => invite });
+  };
+
+  new Function('window', 'document', 'fetch', 'navigator', script)(window, document, fetch, navigator);
 
   const visible = SECTIONS.filter((s) => !els[s].hidden);
-  return { visible, robots: robots.content, footHidden: foot.hidden, fetched,
+  return { visible, robots: robots.content, footHidden: foot.hidden, fetched, els, copied,
            bodyClass: body.className,
            eventOpen: els.eventOpen.href,
            joins: [els.getApp, els.getAppMid, els.getAppFoot].map((e) => (e.hidden ? null : e.href)),
@@ -276,5 +301,43 @@ assert('carries a "Last updated" date the app version can be checked against',
 assert('does not promise moderation the app does not have',
        !/automated filter/i.test(terms) && !/community moderator/i.test(terms) &&
        !/reputation system/i.test(terms));
+
+console.log('\n--- deferred invite: carrying the id through an App Store install ---');
+// A universal link only opens the app when the app was ALREADY installed, so the tap
+// that sends someone to the store carries nothing. The page copies the invite URL in
+// the SAME gesture; app/hooks/useDeferredInvite.ts offers it on first launch.
+// ⚠️ STOPGAP — tear this section down with the clipboard write when Branch.io ships.
+const F = (v) => ({ stringValue: v });
+const PREVIEW = { fields: { groupId: F('g1'), groupName: F('Family'), inviterHandle: F('alex'),
+                            visibility: F('private') } };
+
+const before = run('/i/abc123', PREVIEW);
+assert('a resolved invite shows the invite card', before.visible.join() === 'invite');
+assert('NOTHING is copied before the install button is pressed', before.copied.length === 0);
+assert('the after-install line is hidden until it is needed', before.els.afterInstall.hidden === true);
+
+const after = run('/i/abc123', PREVIEW);
+after.els.install.click();
+assert('pressing Get Searchlight copies THIS invite url, not the bare domain',
+       after.copied.length === 1 && after.copied[0] === 'https://searchlight.social/i/abc123');
+assert('the install button still goes to the App Store', after.els.install.href === APP_STORE_URL);
+assert('the after-install line appears on the press', after.els.afterInstall.hidden === false);
+assert('the line tells them to tap the link again — the floor under every other path',
+       /tap this link again/i.test(after.els.afterInstall.textContent));
+
+// Android has no silent clipboard probe and the alert never fires there, so the written
+// sentence is the entire mechanism on that platform. A copy that throws must not take
+// the store link down with it.
+const noClipboard = (() => {
+  const r = run('/i/abc123', PREVIEW);
+  r.els.install.click();
+  return r;
+})();
+assert('a clipboard failure still leaves a working store link and the hint',
+       noClipboard.els.install.href === APP_STORE_URL &&
+       noClipboard.els.afterInstall.hidden === false);
+
+assert('the app-side parser and this page agree on the url shape',
+       /searchlight\.social\/i\//.test(after.copied[0]));
 
 process.exit(failed ? 1 : 0);
