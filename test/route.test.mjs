@@ -151,8 +151,11 @@ for (const block of ['hr', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'div', 'p']) {
   assert(`no <${block}> nested directly inside a <p>`,
          !new RegExp(`<p[^>]*>\\s*<${block}[ >/]`).test(html));
 }
-assert('no heading nested inside a list item',
-       !/<li[^>]*>\s*<h[1-6][ >]/.test(html));
+// REMOVED 2026-09-19: 'no heading nested inside a list item'. It forbade valid HTML —
+// <li> accepts flow content, headings included — and it was blocking the correct fix for
+// `<h4><li>…</li></h4>`, which really was invalid. It was written against
+// `<li><h4>…</h4><li><br>`, where the actual defect was the unclosed <li>; the <li> tag
+// balance check above catches that (2 open / 1 close) and is the one doing the work.
 
 console.log('\n--- copy ---');
 assert('no "Join the beta" copy survives the launch', !/join the beta/i.test(html));
