@@ -4,3 +4,30 @@
 # (see the file itself); the home, privacy, and support pages stay web pages.
 /.well-known/apple-app-site-association
   Content-Type: application/json
+
+# SL-H-035 — a baseline security posture for a static site. The named risk is
+# clickjacking and XSS amplification "if pages grow scripts", so the two directives
+# doing the real work are `frame-ancestors 'none'` and a default of `'none'`.
+#
+# THE ONE THAT WOULD BREAK EVERYTHING IF DROPPED: connect-src names
+# firestore.googleapis.com. The invite landing page reads
+# groupInvitePreviews/{inviteId} straight from the REST API — there is no server
+# here, so that fetch IS the feature. A CSP without it turns every invite link into
+# the "invalid invite" state, silently, with a console error no visitor will see.
+# `test/route.test.mjs` pins it for that reason.
+#
+# 'unsafe-inline' IS PRESENT AND IS NOT AN OVERSIGHT. The page's script and styles
+# are inline by design — no build step, no bundler, nothing to cache-bust. Hashes
+# would be stricter and would break on every copy edit, silently, because a blocked
+# inline script leaves the page looking merely empty. For a static page with no user
+# input and no third-party script, the honest trade is: keep inline, deny everything
+# else, and make framing impossible.
+#
+# HSTS carries no `preload`. The directive is cheap to add and the PRELOAD LIST is a
+# one-way door — removal takes months and it applies to every subdomain of
+# searchlight.social. That is a founder decision, not a header default.
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://firestore.googleapis.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

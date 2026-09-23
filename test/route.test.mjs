@@ -16,6 +16,7 @@ const support = readFileSync(url('../public/support/index.html'), 'utf8');
 const terms = readFileSync(url('../public/terms/index.html'), 'utf8');
 const aasa = JSON.parse(readFileSync(url('../public/.well-known/apple-app-site-association'), 'utf8'));
 const robots = readFileSync(url('../public/robots.txt'), 'utf8');
+const headers = readFileSync(url('../public/_headers'), 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const SECTIONS = ['home', 'loading', 'invite', 'invalid', 'event'];
@@ -353,5 +354,27 @@ assert('a clipboard failure still leaves a working store link and the hint',
 
 assert('the app-side parser and this page agree on the url shape',
        /searchlight\.social\/i\//.test(after.copied[0]));
+
+// ── SL-H-035: the security headers, and the one directive that can silently
+// break the product. There is no server here — the invite page reads
+// groupInvitePreviews straight from the Firestore REST API, so a CSP that omits
+// that host turns every invite link into "invalid invite" with nothing visible
+// but a console error. These assertions exist so a future tightening cannot do
+// that quietly.
+const csp = (headers.match(/Content-Security-Policy: ([^\n]*)/) || [])[1] || '';
+assert('a CSP is set at all', csp.length > 0);
+assert('THE LOAD-BEARING ONE: connect-src allows the Firestore REST host the invite page fetches',
+       /connect-src[^;]*firestore\.googleapis\.com/.test(csp));
+assert('the page cannot be framed — the clickjacking half of SL-H-035',
+       /frame-ancestors 'none'/.test(csp));
+assert('everything not named is denied by default', /default-src 'none'/.test(csp));
+assert('nothing may be posted anywhere from these pages', /form-action 'none'/.test(csp));
+assert('HSTS is set for a year across subdomains',
+       /Strict-Transport-Security: max-age=31536000; includeSubDomains/.test(headers));
+assert('HSTS does NOT claim preload — the list is a one-way door and a founder call',
+       !/Strict-Transport-Security:[^\n]*preload/.test(headers));
+assert('content types are not sniffed', /X-Content-Type-Options: nosniff/.test(headers));
+assert('the apple-app-site-association content type survives the new block',
+       /\/\.well-known\/apple-app-site-association\n\s+Content-Type: application\/json/.test(headers));
 
 process.exit(failed ? 1 : 0);
